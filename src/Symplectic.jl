@@ -1,3 +1,9 @@
+#= 
+    Install Package:  
+        In Julia REPL:
+            1. type ']' to enter the 'pkg' interface
+            2. type 'add "https://github.com/Mengzhen-Zhang/Symplectic.jl.git"'
+=#
 module Symplectic
 
 using LinearAlgebra
@@ -5,7 +11,7 @@ using LinearAlgebra
 export isSquare, sympCayleyTransform, inverseSympCayleyTransform, sympRound, Symp
 export nModes, isGeneric, Omega, Ω, Id, ⊗, dsum, ⊕, randomSymmetric, randomSymp, randomGenericSymp
 export monoSymp, localSympFromQuad, getDecoupleSequence, getInterferenceBasedSequence, sympToGraph
-export getColors, contract, beamSplitter, circulator
+export getColors, contract, beamSplitter, circulator, teleportationBasedSymplecticControl
 
 # Used to measure how close a quanity is to zero
 tolerance = 10^-6
@@ -301,3 +307,4 @@ end
 
 # Module End
 end
+
