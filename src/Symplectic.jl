@@ -8,13 +8,38 @@ module Symplectic
 
 using LinearAlgebra
 
-export isSquare, sympCayleyTransform, inverseSympCayleyTransform, sympRound, Symp
-export nModes, isGeneric, Omega, Ω, Id, ⊗, dsum, ⊕, randomSymmetric, randomSymp, randomGenericSymp
-export monoSymp, localSympFromQuad, getDecoupleSequence, getInterferenceBasedSequence, sympToGraph
+# Data Type
+export Symp
+# Methods
+export isSquare, nModes, isGeneric, Omega, Ω, Id, ⊗, dsum, ⊕
+# Functions
+export sympCayleyTransform, inverseSympCayleyTransform, sympRound
+export randomSymmetric, randomSymp, randomGenericSymp
+export localSympFromQuad, getDecoupleSequence, getInterferenceBasedSequence, sympToGraph, monoSymp
 export getColors, contract, beamSplitter, circulator, teleportationBasedSymplecticControl
+export randomPassiveLocalSymp, randomLocalSymp, getAllColors, getColorSets
 
 # Used to measure how close a quanity is to zero
-tolerance = 10^-6
+const tolerance = 10^-6
+
+const Graph = AbstractMatrix{Bool}
+const Colors = Vector
+const Vertex = Int
+const Colored = Bool
+const NofModes = Int
+
+# Data Type For Symplectic Matrices
+struct Symp{T}
+    S:: AbstractMatrix{T}
+    function Symp{T}(S::AbstractMatrix{T}) where T
+        if !(T<:Real) return error("not real") end
+        n = isSquare(S) ÷ 2
+        Ω = cat(fill([0 1; -1 0], n)...; dims=(1,2))
+        if (norm(S*Ω*S' - Ω) >= tolerance) return error("not symplectic") end
+        return new{T}(S)
+    end
+end
+
 
 #=
     Functions not involving Symp
@@ -44,19 +69,6 @@ function sympRound(S::AbstractMatrix)::AbstractMatrix
     end
 end
 
-
-# Data Type For Symplectic Matrices
-struct Symp{T}
-    S:: AbstractMatrix{T}
-    function Symp{T}(S::AbstractMatrix{T}) where T
-        if !(T<:Real) return error("not real") end
-        n = isSquare(S) ÷ 2
-        Ω = cat(fill([0 1; -1 0], n)...; dims=(1,2))
-        if (norm(S*Ω*S' - Ω) >= tolerance) return error("not symplectic") end
-        return new{T}(S)
-    end
-end
-
 #=
    Methods
 =#
@@ -81,7 +93,7 @@ isGeneric(S::Symp)::Bool = isGeneric(S.S)
     Constructor
 =#    
 # From Matrix
-Symp(S) = Symp{typeof(S).parameters[1]}(S)
+Symp(S::AbstractMatrix) = Symp{typeof(S).parameters[1]}(S)
 # From Symplectic Matrix
 Symp(S::Symp) = S
 # Rounding a Symplectic Matrix using Cayley Transform
@@ -239,10 +251,6 @@ function getInterferenceBasedSequence(S::Symp, ST::Symp)::Vector{Symp}
     return vcat([ LR ] , Ss...)
 end
 # Generate a Graph based on the given Symplectic Matrix
-const Graph = AbstractMatrix{Bool}
-const Colors = Vector
-const Vertex = Int
-const Colored = Bool
 
 function sympToGraph( S::Symp )::Graph
     n = nModes(S)
@@ -277,9 +285,15 @@ function areColoredVeticesConnected(ci, cj, colorSets::Dict, G::Graph)::Bool
     return any(G[vis, vjs])
 end
 
+getAllColors(Cs::Colors)::Vector = [Set(Cs)...]
+
+function getColorSets(Cs::Colors)::Dict
+    allColors = getAllColors(CS)
+    return Dict(c => findall(x -> x == c, Cs) for c in allColors)
+end
+
 function contract( G::Graph, Cs::Colors )
-    allColors = [Set(Cs)...]
-    colorSets = Dict(c => findall(x -> x == c, Cs) for c in allColors)
+    colorSets = getColorSets(Cs)
     return [areColoredVeticesConnected(ci, cj, colorSets, G) for  ci in allColors, cj in allColors]
 end
 
@@ -305,7 +319,18 @@ function teleportationBasedSymplecticControl(S::Symp, in_modes::Vector, out_mode
     return S_out_in - S_out_usq * S_hm_usq^-1 * S_hm_in
 end
 
-# Module End
+randomPassiveLocalSymp(n::NofModes)::Symp = n == 1 ? monoSymp(2π*rand()) : ⊕([monoSymp(2π*rand()) for i in 1:n]...)
+
+randomLocalSymp(n::NofModes, range::Real = 3)::Symp = n == 1 ? randomSymp(1, range) : ⊕([randomSymp(1, range) for i in 1:n]...)
+
+function randomizeSymp(S::Symp, l::Int)::Symp
+    n = nModes(S)
+    if l == 1
+        return randomPassiveLocalSymp(n) * S  * randomPassiveLocalSymp(n)
+    else
+        return *([randomizeSymp(S, 1) for i in 1:l]...)
+    end
 end
 
-
+# Module End
+end
