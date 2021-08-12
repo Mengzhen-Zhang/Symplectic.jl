@@ -1,0 +1,10 @@
+name = "Symplectic"
+uuid = "32b24f23-0065-419a-aebb-272ab3b73786"
+authors = ["Mengzhen-Zhang <mengzhen.zhang@outlook.com>"]
+version = "0.1.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+
+[compat]
+julia = "1.6.2"
