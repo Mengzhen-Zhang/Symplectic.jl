@@ -290,16 +290,16 @@ beamSplitter(angle::Real)::Symp = monoSymp(angle) ⊗ Id(1)
 circulator(perm::Vector)::Symp = hvcat(length(perm), [i == perm[j] ? Id(1).S : zeros(2, 2)   for i in 1:length(perm), j in 1:length(perm) ]...)
 
 # Calculate the effective Symplectic Matrix output of the adaptive Gaussian control scheme
-function teleportationBasedSymplecticControl(S::Symp, inModes::Vector, outModes::Vector)::Symp
-    n = nModes(S)
-    in = vcat( [ [2*i - 1, 2 * i] for i in inModes ] )
-    out = vcat( [ [2*i - 1, 2 * i] for i in outModes ] )
-    ancilliaryModes = [i for i in 1:n if !(i in inModes)]
-    idleModes = [i for i in 1:n if !(i in outModes)]
-    usq = 2*ancilliaryModes
-    hm = 2*idleModes
-    S_out_in = S.S[ out, in  ]
-    S_hm_in = S.S[ hm, in ]
+function teleportationBasedSymplecticControl(S::Symp, in_modes::Vector, out_modes::Vector)::Symp
+    all_modes = [1:nModes(S);]
+    in_ = vcat( [ [2*i - 1, 2 * i] for i in in_modes ]... )
+    out = vcat( [ [2*i - 1, 2 * i] for i in out_modes ]... )
+    ancilliary_modes = [i for i in all_modes if !(i in in_modes)]
+    idle_modes = [i for i in all_modes if !(i in out_modes)]
+    usq = 2*ancilliary_modes
+    hm = 2*idle_modes
+    S_out_in = S.S[ out, in_  ]
+    S_hm_in = S.S[ hm, in_ ]
     S_out_usq = S.S[ out, usq ]
     S_hm_usq = S.S[ hm, usq ]
     return S_out_in - S_out_usq * S_hm_usq^-1 * S_hm_in
@@ -308,3 +308,4 @@ end
 # Module End
 end
 
+Symplectic.teleportationBasedSymplecticControl( Symplectic.randomGenericSymp(2), [1, 2], [1, 2]  )
