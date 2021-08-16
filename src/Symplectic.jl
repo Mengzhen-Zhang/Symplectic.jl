@@ -17,7 +17,7 @@ export sympCayleyTransform, inverseSympCayleyTransform, sympRound
 export randomSymmetric, randomSymp, randomGenericSymp
 export localSympFromQuad, getDecoupleSequence, getInterferenceBasedSequence, sympToGraph, monoSymp
 export getColors, contract, beamSplitter, circulator, teleportationBasedSymplecticControl
-export randomPassiveLocalSymp, randomLocalSymp, getAllColors, getColorSets
+export randomPassiveLocalSymp, randomLocalSymp, getAllColors, getColorSets, randomizeSymp
 
 # Used to measure how close a quanity is to zero
 const tolerance = 10^-6
@@ -263,9 +263,10 @@ function colorSuccessors(sucs, Cs::Colors)::Colors
     return Cs
 end  
 
-function  getColors( G::Graph, Cs::Colors )::Colors
+function  getColors( G::Graph )::Colors
     colored = false
-    n = length(Cs)
+    n = isSquare(G) # = length(Cs)
+    Cs = [1:n;]
     for v in 1:n
         sameColorVs = G[ findall(x->x == Cs[v], Cs ), :]
         sucs = findall(vi->any(sameColorVs[:, vi] ),  [1:n;] )
@@ -275,7 +276,7 @@ function  getColors( G::Graph, Cs::Colors )::Colors
             colored = true
         end
     end
-    return colored ? getColors(G, Cs) : Cs
+    return colored ? getColors(G) : Cs
 end
 
 # Is i a successor of j (both colored)?
@@ -291,6 +292,8 @@ function getColorSets(Cs::Colors)::Dict
     allColors = getAllColors(CS)
     return Dict(c => findall(x -> x == c, Cs) for c in allColors)
 end
+
+getColorSetsFromSymp = getColorSets ∘ getColors ∘ sympToGraph
 
 function contract( G::Graph, Cs::Colors )
     colorSets = getColorSets(Cs)
