@@ -1,8 +1,8 @@
 #= 
     Install Package:  
         In Julia REPL:
-            1. type ']' to enter the 'pkg' interface
-            2. type 'add "https://github.com/Mengzhen-Zhang/Symplectic.jl.git"'
+            1. type  ']'  to enter the  'pkg'  interface
+            2. type  ' add "https://github.com/Mengzhen-Zhang/Symplectic.jl.git" '
 =#
 module Symplectic
 
