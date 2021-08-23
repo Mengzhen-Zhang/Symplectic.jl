@@ -11,7 +11,6 @@ const files = (
     # "cayley_transform"
 )
 
-
 @testset "Symplectic.jl" begin    
     @testset "$(titlecase(f))" for f in files
         include("$f.jl")
