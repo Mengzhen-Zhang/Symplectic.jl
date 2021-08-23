@@ -1,6 +1,5 @@
-export Symp, isSquare, isGeneric, nModes, ⊗, dsum, ⊕
-
-const tolerance = 10^-6
+export Symp, isGeneric, nModes, ⊗, dsum, ⊕
+export Omega, Ω, Id
 
 struct Symp{T} <: AbstractMatrix{T}
     S:: AbstractMatrix{T}
@@ -28,12 +27,16 @@ Base.convert(::Type{Symp}, S::AbstractMatrix) = Symp(S)
 Base.convert(::Type{Symp}, S::Symp) = S
 Base.convert(::Type{AbstractMatrix}, S::Symp) = Matrix(S)
 
+# Fundamental Constructors
+# From Number of Modes to Symplectic Form
+Omega(n::Int)::Symp = cat(fill([0 1; -1 0], n)...; dims=(1,2)) 
+Ω = Omega
+# From Number of Modes to Identity Symplectic Matrix
+Id(n::Int)::Symp = Matrix(1I, 2*n, 2*n)
+# Single Mode Gaussian Operation
 
 # Properties
-isSquare = LinearAlgebra.checksquare
-LinearAlgebra.issymmetric(S::Symp)::Bool = issymmetric(S.S)
-LinearAlgebra.isposdef(S::Symp)::Bool = isposdef(S.S)
-LinearAlgebra.isdiag(S::Symp)::Bool = isdiag(S.S)
+# isSquare = LinearAlgebra.checksquare
 isGeneric(m::AbstractMatrix)::Bool = all(x -> abs(x) > tolerance, m )
 isGeneric(S::Symp)::Bool = isGeneric(S.S)
 nModes(S::Symp)::Int = size(S)[1] ÷ 2       # Number of Modes
