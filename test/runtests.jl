@@ -4,7 +4,7 @@ using LinearAlgebra
 
 const files = (
     "symp",
-    # "symp_generators",
+    "symp_generators",
     # "color_sets",
     # "interference_based_sequence",
     # "teleportation_based_generator",

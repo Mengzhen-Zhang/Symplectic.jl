@@ -1,5 +1,5 @@
 export Symp, isGeneric, nModes, ⊗, dsum, ⊕
-export Omega, Ω, Id
+export Omega, Ω
 
 struct Symp{T} <: AbstractMatrix{T}
     S:: AbstractMatrix{T}
@@ -30,9 +30,9 @@ Base.convert(::Type{AbstractMatrix}, S::Symp) = Matrix(S)
 # Fundamental Constructors
 # From Number of Modes to Symplectic Form
 Omega(n::Int)::Symp = cat(fill([0 1; -1 0], n)...; dims=(1,2)) 
+Omega(S::Symp)::Symp = Omega(size(S)[1] ÷ 2)
 Ω = Omega
-# From Number of Modes to Identity Symplectic Matrix
-Id(n::Int)::Symp = Matrix(1I, 2*n, 2*n)
+
 # Single Mode Gaussian Operation
 
 # Properties
@@ -48,7 +48,7 @@ Base.adjoint(S::Symp)::Symp = Base.adjoint( S.S )
 Base.:-(S::Symp)::Symp = Base.:-( S.S )
 Base.:+(S::Symp)::Symp = Base.:+( S.S )
 # Inverse
-Base.inv(S::Symp)::Symp = - Ω(nModes(S)) * S' * Ω(nModes(S)) 
+Base.inv(S::Symp)::Symp = - Ω(S) * S' * Ω(S) 
 Base.:*(S1::Symp, S2::Symp, Ss::Vararg{Symp})::Symp = *(S1.S, S2.S,  [s.S for s in Ss]... )
 ⊗ = Base.kron
 # Direct Sum

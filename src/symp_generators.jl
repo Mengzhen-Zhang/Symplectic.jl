@@ -1,13 +1,10 @@
-export Omega, Ω, Id, monoSymp, beamSplitter, circulator
+export Id, monoSymp, beamSplitter, circulator
 export randomSymmetric, randomSymp, randomGenericSymp
 export randomPassiveLocalSymp, randomLocalSymp, randomizeSymp
 
-# From Number of Modes to Symplectic Form
-Omega(n::Int)::Symp = cat(fill([0 1; -1 0], n)...; dims=(1,2)) 
-Ω = Omega
 # From Number of Modes to Identity Symplectic Matrix
 Id(n::Int)::Symp = Matrix(1I, 2*n, 2*n)
-# Single Mode Gaussian Operation
+
 monoSymp(θ::Real)::Symp =  exp(θ*Ω(1)) 
 # Generte a Two-Mode BeamSplitter
 beamSplitter(angle::Real)::Symp = monoSymp(angle) ⊗ Id(1)

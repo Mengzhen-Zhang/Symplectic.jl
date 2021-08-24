@@ -1,7 +1,7 @@
-export  teleportationBasedSymplecticControl
+export  teleportationBasedSympGenerator
 
 # Calculate the effective Symplectic Matrix output of the adaptive Gaussian control scheme
-function teleportationBasedSymplecticControl(S::Symp, in_modes::Vector, out_modes::Vector)::Symp
+function teleportationBasedSympGenerator(S::Symp, in_modes::Vector, out_modes::Vector)::Symp
     all_modes = [1:nModes(S);]
     in_ = vcat( [ [2*i - 1, 2 * i] for i in in_modes ]... )
     out = vcat( [ [2*i - 1, 2 * i] for i in out_modes ]... )

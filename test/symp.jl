@@ -16,6 +16,5 @@ S = randomGenericSymp(4)
 @test typeof(+S) <: Symp
 @test isapprox( inv(S) * S, Id(4); atol = tolerance )
 @test Omega(2) == Symp([0 1 0 0; -1 0 0 0; 0 0 0 1; 0 0 -1 0])
-@test Id(2) == Symp([1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 1])
 @test dsum(Id(2), Id(2), Id(2)) == Id(6)
 @test S^-1 == inv(S)
