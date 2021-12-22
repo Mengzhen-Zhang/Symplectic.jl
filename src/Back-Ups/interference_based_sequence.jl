@@ -1,4 +1,4 @@
-export localSympFromQuad, getDecoupleSequence, getInterferenceBasedSequence
+export localSympFromQuad, getDecoupleSequence, getInterferenceBasedSequence, getSequence
 
 # From (source quadrautre, target quadratre) to Local Symplectic Matrix transforming source to Ω target
 ↑(m, i) = 2*m - (i % 2)
@@ -16,9 +16,13 @@ function localSympFromQuad(u::Vector, v::Vector)::Symp
         return error("input not valid") 
     end
     n = length(u) ÷ 2
-    return ⊕([ Symp([ Lkmij(u, v, m, i, j) for i in 1:2, j in 1:2 ]) for m in 1:n ]...)
-    return mapreduce( identity, ⊕, 
-        [ Symp([ Lkmij(u, v, m, i, j) for i in 1:2, j in 1:2 ]) for m in 1:n ])
+    # scale = rand()
+    scale = 1
+    if n == 1
+        return Symp([ Lkmij(scale * u, v, 1, i, j) for i in 1:2, j in 1:2 ])
+    else
+        return ⊕([ Symp([ Lkmij(scale * u, v, m, i, j) for i in 1:2, j in 1:2 ]) for m in 1:n ]...)
+    end
 end
 # Get Local Operations L3 L2 L1 for the Decoupling Sequence S4 L3 S3 L2 S2 L1 S1
 function getDecoupleSequence(S4::Symp, S3::Symp, S2::Symp, S1::Symp, m::Int=1)::Vector{Symp}
@@ -41,9 +45,10 @@ function getSequence(Ss::Vector{Symp{T}}, modeToDecouple::Int)::Vector{Symp} whe
         Rs = [ getSequence(Ss[i:i+step-1], modeToDecouple-1 ) for i in 1:step:length(Ss) ]
 
         Ls = getDecoupleSequence([ *(RLst...) for RLst in Rs]..., modeToDecouple)
-        return vcat([ (i%2==0) ? Ls[i] : Rs[(i+1) ÷ 2] for i in 1:7 ]...)
+        return vcat([ (i%2==0) ? [ Ls[i] ] : Rs[(i+1) ÷ 2] for i in 1:7 ]...)
     end
 end
+
 function getInterferenceBasedSequence(S::Symp, ST::Symp)::Vector{Symp}
     if !(isGeneric(S))  return error("not generic") end
     Ss = [S for i in 1:4^nModes(ST)]
@@ -51,5 +56,29 @@ function getInterferenceBasedSequence(S::Symp, ST::Symp)::Vector{Symp}
     Ss = getSequence(Ss, nModes(ST))
     LR = Symp( ( *(Ss...).S[1:2*nModes(ST), 1:2*nModes(ST)]) )^-1  ⊕ Id(nModes(S) - nModes(ST)) 
     Ss[end] =  Ss[end] * (ST ⊕ Id(nModes(S) - nModes(ST)))
-    return vcat([ LR ] , Ss...)
+    return vcat([ LR ] , Ss)
+end
+
+
+
+# Interference-Based Sequence with Automatic Local Randomization
+function getSequenceWithRandomization(Ss::Vector{Symp{T}}, modeToDecouple::Int)::Vector{Symp} where T
+    if length(Ss) == 4
+        return getDecoupleSequence(Ss..., modeToDecouple)
+    else
+        step = length(Ss) ÷ 4
+        Rs = [ getSequence(Ss[i:i+step-1], modeToDecouple-1 ) for i in 1:step:length(Ss) ]
+
+        Ls = getDecoupleSequence([ *(RLst...) for RLst in Rs]..., modeToDecouple)
+        return vcat([ (i%2==0) ? [ Ls[i] ] : Rs[(i+1) ÷ 2] for i in 1:7 ]...)
+    end
+end
+function getIQSWithRandomization(S::Symp, ST::Symp)::Vector{Symp}
+    if !(isGeneric(S))  return error("not generic") end
+    Ss = [S for i in 1:4^nModes(ST)]
+    Ss[end] =  Ss[end] * (ST ⊕ Id(nModes(S) - nModes(ST)))^-1
+    Ss = getSequenceWithRandomization(Ss, nModes(ST))
+    LR = Symp( ( *(Ss...).S[1:2*nModes(ST), 1:2*nModes(ST)]) )^-1  ⊕ Id(nModes(S) - nModes(ST)) 
+    Ss[end] =  Ss[end] * (ST ⊕ Id(nModes(S) - nModes(ST)))
+    return vcat([ LR ] , Ss)
 end

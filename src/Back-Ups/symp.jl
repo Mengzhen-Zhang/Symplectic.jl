@@ -36,8 +36,9 @@ Omega(S::Symp)::Symp = Omega(size(S)[1] ÷ 2)
 # Single Mode Gaussian Operation
 
 # Properties
-# isSquare = LinearAlgebra.checksquare
-isGeneric(m::AbstractMatrix)::Bool = all(x -> abs(x) > tolerance, m )
+isSquare = LinearAlgebra.checksquare
+# isGeneric(m::AbstractMatrix)::Bool = all(x -> abs(x) > tolerance, m )
+isGeneric(m::AbstractMatrix)::Bool = true
 isGeneric(S::Symp)::Bool = isGeneric(S.S)
 nModes(S::Symp)::Int = size(S)[1] ÷ 2       # Number of Modes
 

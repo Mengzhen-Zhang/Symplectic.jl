@@ -1,37 +1,31 @@
-#= 
-    Install Package:  
-        In Julia REPL:
-            1. type  ']'  to enter the  'pkg'  interface
-            2. type  ' add "https://github.com/Mengzhen-Zhang/Symplectic.jl.git" '
-=#
 module Symplectic
+    import LinearAlgebra
+    
+    include("Utilities/LinearAlgebraUtilities.jl")
+    import .LinearAlgebraUtilities
 
-using LinearAlgebra
+    include("DataTypes/SymplecticMatrix.jl")
 
-const tolerance = 10^-6
+    include("DataTypes/MatrixSequence.jl")
 
-const Graph = AbstractMatrix{Bool}
-const Colors = Vector
-const Vertex = Int
-const Colored = Bool
-const NofModes = Int
 
-# Define DataType Symp for Symplectic Matrices
-include("symp.jl")
 
-# Functions for Generating Symplectic Matrices
-include("symp_generators.jl")
+    # Data type: SymplecticMatrix
+    export SymplecticMatrix,
+           Omega, Ω,
+           isGeneric,
+           ⊗,
+           dsum, ⊕
 
-# Functions for Generating Color Sets
-include("color_sets.jl")
+    # Data type: MatrixSequence
+    export MatrixSequence,
+           sliceInner,
+           slice,
+           setInterspersion,
+           setSequence,
+           replaceSequence
 
-# Implemention of Interfernce Based Algorithms
-include("interference_based_sequence.jl")
-
-# Implemention of Teleportation Based Symplectic Matrix Generator
-include("teleportation_based_generator.jl")
-
-# Implemention of (Inverse) Symplectic Cayley Transform
-include("cayley_transform.jl")
+    # Utility module for linear algebra
+    export LinearAlgebraUtilities
 
 end
