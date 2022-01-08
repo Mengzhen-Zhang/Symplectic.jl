@@ -1,12 +1,44 @@
+# Utilities
+using LinearAlgebra: checksquare, opnorm
+
+include("SymplecticForm.jl")
+
+# calculate the 'nonSymplecticity".
+nonSymplecticity(A::AbstractMatrix) = opnorm(A'*Ω*A - Ω) / opnorm(A)
+
+# check if a matrix is symplectic, returning its non-symplecticity
+function checkSymplectic(A::AbstractMatrix)
+    A <: Real || throw(ArgumentError("matrix is not real-valued"))
+    checksquare(A) % 2 == 0 || throw(DimensionMismatch("matrix is not even-dimensional"))
+    return nonSymplecticity(A)
+end
+function checkSymplecticMatrix(A...)
+    nonSymplecticities = []
+    for a in A
+        a <: Real || throw(ArgumentError("matrix is not real-valued"))
+        checksquare(a) % 2 == 0 || throw(DimensionMismatch("matrix is not even-dimensional"))
+        push!(nonSymplecticities, nonSymplecticity(a))
+    end
+    return nonSymplecticities
+end
+
+
+
+
+
+
+    
+
+
 using LinearAlgebra
 
 # Define the AbstractSymplecticMatrix data type
 abstract type AbstractSymplecticMatrix{T} <: AbstractArray{T, 2} end
 Base.size(A::AbstractSymplecticMatrix) = error("size not implemented")
 Base.getindex(A::AbstractSymplecticMatrix, i::Int) = error("getindex not implemented")
-Base.getindex(A::AbstractSymplecticMatrix, I::Vararg{Int, N}) = error("getindex not implemented")
+Base.getindex(A::AbstractSymplecticMatrix, I::Vararg{Int, N}) where {N} = error("getindex not implemented")
 Base.setindex!(A::AbstractSymplecticMatrix, v, i::Int) = error("setindex! not implemented")
-Base.setindex!(A::AbstractSymplecticMatrix, v, I::Vararg{Int, N}) = error("setindex! not implemented")
+Base.setindex!(A::AbstractSymplecticMatrix, v, I::Vararg{Int, N}) where {N} = error("setindex! not implemented")
 # get a Q-quadrature from columns
 getQCol(A::AbstractSymplecticMatrix, i::Int) = error("getQCol not implemented")
 # get a P-quadrature from columns
@@ -38,7 +70,7 @@ end
 
 Base.size(S::SymplecticMatrix) = size(S.matrix)
 Base.getindex(S::SymplecticMatrix, i::Int) = getindex(S.matrix, i)
-Base.getindex(S::SymplecticMatrix, I::Vararg{Int, N}) = getindex(S.matrix, I)
+Base.getindex(S::SymplecticMatrix, I::Vararg{Int, N}) where {N} = getindex(S.matrix, I)
 getQCol(S::SymplecticMatrix, i::Int) = S.matrix[:, 2*i-1]
 getPCol(S::SymplecticMatrix, i::Int) = S.matrix[:, 2*i]
 getQRow(S::SymplecticMatrix, i::Int) = S.matrix[2*i-1, :]
@@ -66,7 +98,7 @@ dsum(S1::SymplecticMatrix, S2::SymplecticMatrix, Ss::Vararg{SymplecticMatrix})::
 
 Base.Matrix(S::SymplecticMatrix)::Array{T, 2} = S.matrix
 Base.convert(::Type{SymplecticMatrix}, S::SymplecticMatrix) = S
-Base.convert(::Type{SymplecticMatrix}, M::AbstractArray{T, 2}) = SymplecticMatrix(M)
+Base.convert(::Type{SymplecticMatrix}, M::AbstractArray{T, 2}) where T = SymplecticMatrix(M)
 Base.convert(::Type{AbstractArray}, S::SymplecticMatrix) = Matrix(S)
 
 
