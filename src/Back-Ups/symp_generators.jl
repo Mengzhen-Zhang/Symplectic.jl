@@ -5,7 +5,7 @@ export randomPassiveLocalSymp, randomLocalSymp, randomizeSymp
 # From Number of Modes to Identity Symplectic Matrix
 Id(n::Int)::Symp = Matrix(1I, 2*n, 2*n)
 
-monoPassiveSymp(θ::Real)::Symp =  exp(θ*Ω(1)) 
+monoPassiveSymp(θ::Real)::Symp =  exp(θ*Ω(1))
 monoSymp(θ1::Real, l::Real, θ2::Real)::Symp =  monoPassiveSymp(θ1) * Symp([l 0 ; 0  1/l ]) * monoPassiveSymp(θ2)
 
 # Generte a Two-Mode BeamSplitter

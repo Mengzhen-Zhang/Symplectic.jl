@@ -36,6 +36,7 @@ function getDecoupleSequence(S4::Symp, S3::Symp, S2::Symp, S1::Symp, m::Int=1)::
     L2 = localSympFromQuad(u, v)
     return [S4, L3, S3, L2, S2, L1, S1]
 end
+
 # Get local Operations L16, L15, ..., L1 for the interfernce-basded sequence LR S L15 S ... S L1 S, with a given 4×4 target Symplectic Matrix S⊙
 function getSequence(Ss::Vector{Symp{T}}, modeToDecouple::Int)::Vector{Symp} where T
     if length(Ss) == 4
