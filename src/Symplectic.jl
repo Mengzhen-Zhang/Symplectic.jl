@@ -6,7 +6,9 @@ include("DataTypes/SymplecticForm.jl")
 export SymplecticForm, Ω, nonSymplecticity, checkSymplectic, modes,
        qQuadrature, pQuadrature, ⊗, dsum, ⊕, sct, isct, symplecticCayleyTransform,
        inverseSymplecticCayleyTransform, lstf, localSymplecticTransformation, ibs,
-       interferenceBasedSequence, decoupleSequence, teleportation
+       interferenceBasedSequence, decoupleSequence, teleportation, genericity, generify,
+       phaseShifting, randomPhaseShifiting, localSymplecticMatrix, randomLocalSymplecticMatrix,
+       beamSplitter, circulator
 
 # Utilities
 using LinearAlgebra: checksquare, opnorm
