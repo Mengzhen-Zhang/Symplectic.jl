@@ -21,7 +21,7 @@ end
 const Ω = SymplecticForm(1)
 
 function (Ω::SymplecticForm)(n::Integer) 
-    B = zeros(Integer, n, n)
+    B = zeros(Int, n, n)
     @inbounds for i in 1:n
         if i % 2 == 0
             B[i, i-1] = -1
@@ -285,7 +285,7 @@ function (^)(J::SymplecticForm, x::Int)
         return inv(J) ^ (- x)
     end
 end
-Broadcast.broadcasted(::typeof(^), J::UniformScaling, x::Number) = SymplecticForm(J.λ ^ x)
+Broadcast.broadcasted(::typeof(^), J::SymplecticForm, x::Number) = SymplecticForm(J.λ ^ x)
 
 (==)(J1::SymplecticForm, J2::SymplecticForm) = (J1.λ == J2.λ)
 (==)(J::SymplecticForm, A::AbstractMatrix) = A == J

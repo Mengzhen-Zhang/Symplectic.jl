@@ -11,17 +11,15 @@ function Lkmij(u, v, m, i, j)
         return (-1)^(j+1)*v[↑(m, i)]*u[↓(m, j)]/( v[2*m]^2 + v[2*m-1]^2 ) + (-1)^i*v[↓(m, i)]*u[↑(m, j)]/( u[2*m]^2 + u[2*m-1]^2 )
     end
 end
-function localSympFromQuad(u::Vector, v::Vector)::Symp
+function localSympFromQuad(u::Vector, v::Vector; lambda::Real = 1)::Symp
     if length(u) % 2 !=0 || length(u) != length(v) || getPattern(u) != getPattern(v) 
         return error("input not valid") 
     end
     n = length(u) ÷ 2
-    # scale = rand()
-    scale = 1
     if n == 1
-        return Symp([ Lkmij(scale * u, v, 1, i, j) for i in 1:2, j in 1:2 ])
+        return Symp([ Lkmij(lambda * u, v, 1, i, j) for i in 1:2, j in 1:2 ])
     else
-        return ⊕([ Symp([ Lkmij(scale * u, v, m, i, j) for i in 1:2, j in 1:2 ]) for m in 1:n ]...)
+        return ⊕([ Symp([ Lkmij(lambda * u, v, m, i, j) for i in 1:2, j in 1:2 ]) for m in 1:n ]...)
     end
 end
 # Get Local Operations L3 L2 L1 for the Decoupling Sequence S4 L3 S3 L2 S2 L1 S1
@@ -33,7 +31,7 @@ function getDecoupleSequence(S4::Symp, S3::Symp, S2::Symp, S1::Symp, m::Int=1)::
     T2 = S4 * L3 * S3
     u = T1.S[:,2*m]
     v = T2.S[2*m,:] + sum( (k->T1.S[k,2*m-1]*T1.S[k,2*m]-T2.S[2*m-1,k]*T2.S[2*m,k]).(1:length(u))  ) * T2.S[2*m-1, :]
-    L2 = localSympFromQuad(u, v)
+    L2 = localSympFromQuad(u, v; lambda = lambda)
     return [S4, L3, S3, L2, S2, L1, S1]
 end
 
