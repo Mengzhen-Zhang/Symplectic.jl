@@ -1,6 +1,7 @@
 module Symplectic
 
 import LinearAlgebra
+
 include("DataTypes/SymplecticForm.jl")
 include("DataTypes/CoupledResonators.jl")
 
@@ -12,7 +13,7 @@ export SymplecticForm,
        addGammaEx,
        addGammaIn,
        scatteringMatrix,
-       nonSymplecticity, 
+       # nonSymplecticity, 
        checkSymplectic, 
        modes,
        getQ, 
