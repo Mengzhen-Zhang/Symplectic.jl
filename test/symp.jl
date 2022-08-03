@@ -1,6 +1,7 @@
 using Symplectic
 using LinearAlgebra
 using ForwardDiff
+using Optim
 
 const bs = beamSplitter
 const ϕ = π/4
@@ -46,10 +47,28 @@ opnorm(round.(transpose(S) * S - I))
 
 
 function func(θs::Vector)
-        T = teleportation(phaseShifting([0, 0, θs[1:4]...])*Matrix(S)*phaseShifting([θs[1:4]..., 0, 0]), [1, 2], [1, 2])
+        T = teleportation(phaseShifting([0, 0, θs[3:4]...]...)*Matrix(S)*phaseShifting([θs[1:2]..., 0, 0]...), [1, 2], [1, 2])
         return tr((T - I(4)) * transpose(T - I(4)))
 end
 
+function func2(θs::Vector)
+        teleportation(phaseShifting([0, 0, θs[3:4]...]...)*Matrix(S)*phaseShifting([θs[1:2]..., 0, 0]...), [1, 2], [1, 2])
+end
+
+
+
 g = x -> ForwardDiff.gradient(func, x)
 
-g([0,0,0,0])
+function g2(x::Vector, storage::Vector)
+        tmp = g(x)
+        for i in 1:length(storage)
+                storage[i] = tmp[i]
+        end
+end
+
+g([1,2,0,0])
+
+func([1,2,0,0])
+
+res = optimize(func, g2, [1.0, 2.0, 3.0, 4.0], SimulatedAnnealing())
+func2(Optim.minimizer(res))

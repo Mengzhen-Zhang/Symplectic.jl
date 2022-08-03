@@ -37,7 +37,7 @@ const bs = beamSplitter
 
 function evaluation(θs::Vector)
     S = solution(θs)
-    T = [0 0 1 0; 0 0 0 1; 1 0 0 0; 0 1 0 0] # [0 0 1 0; 0 0 0 1; 1 0 0 0; 0 1 0 0] # bs(π/2) # I(4) # bs(π/3) * Diagonal([2, 1/2, 1/3, 3]) * bs(π/3)
+    T = bs(π / 2) # [0 0 1 0; 0 0 0 1; 1 0 0 0; 0 1 0 0] # [0 0 1 0; 0 0 0 1; 1 0 0 0; 0 1 0 0] # bs(π/2) # I(4) # bs(π/3) * Diagonal([2, 1/2, 1/3, 3]) * bs(π/3)
     return sqrt(tr((S - T) * transpose(S - T)))
 end
 
@@ -47,10 +47,11 @@ end
 
 res = optimize(evaluation,
                 2*π*rand(16),
-                method = BFGS(), 
+                method = LBFGS(), 
                 iterations = 1000000,
                 autodiff = :forward)
 round.(solution(Optim.minimizer(res)), digits = 4)
+Optim.minimizer(res)
 
 # function transmission(θ)
 #     res = teleportation(
