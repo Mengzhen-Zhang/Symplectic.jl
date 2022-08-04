@@ -1,10 +1,5 @@
 using LinearAlgebra:
-        Diagonal,
-        copyto!,
-        diag,
-        I
-
-
+        Diagonal, copyto!, diag, I
 
 struct CoupledResonators
     yr::AbstractMatrix
