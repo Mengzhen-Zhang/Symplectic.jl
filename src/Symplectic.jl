@@ -6,6 +6,8 @@ module Symplectic
        include("SymplecticForm.jl")
        include("CoupledResonators.jl")
        include("helper.jl")
+       include("SymplecticCircuit.jl")
+       include("SymplecticOperation.jl")
 
        export SymplecticForm, Ω,
 

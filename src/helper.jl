@@ -23,7 +23,7 @@ end
    
 # calculate the 'nonSymplecticity".
 nonSymplecticity(J::Union{SymplecticForm, UniformScaling}) = 0
-nonSymplecticity(A::AbstractMatrix) = opnorm(transpose(A)*Ω*A - Ω) / opnorm(Ω)
+nonSymplecticity(A::AbstractMatrix) = tr(transpose(transpose(A)*Ω*A - Ω) * (transpose(A)*Ω*A - Ω) )
 
 # check if a matrix is symplectic, returning its non-symplecticity
 checkSymplectic(J::Union{SymplecticForm, UniformScaling}) = 0
@@ -221,4 +221,41 @@ function spectrum(M::AbstractMatrix)
        end
        S = hcat( es..., fs... )
        return [spec, toQPQPBasis(S)]
+end
+
+function customReshape(xs::Vararg)
+       return reshape([xs[1:end-1]...], (xs[end], xs[end]))
+end
+
+struct CustomFunction
+       l::Int64
+       f::Function
+end
+
+function (f::CustomFunction)(xs::Vararg)
+       f.f(xs...)
+end
+
+function Base.:+(f1::CustomFunction, f2::CustomFunction)
+       l = f1.l + f2.l
+       f = (xs::Vararg) -> begin
+              f1(xs[1:f1.l]...) + f2(xs[f1.l + 1: f1.l + f2.l])
+       end
+       return CustomFunction(l, f)
+end
+
+function Base.:*(f1::CustomFunction, f2::CustomFunction)
+       l = f1.l + f2.l
+       f = (xs::Vararg) -> begin
+              f1(xs[1:f1.l]...) * f2(xs[f1.l + 1: f1.l + f2.l])
+       end
+       return CustomFunction(l, f)
+end
+
+function Base.:+(f1::CustomFunction, f2::CustomFunction)
+       l = f1.l + f2.l
+       f = (xs::Vararg) -> begin
+              f1(xs[1:f1.l]...) - f2(xs[f1.l + 1: f1.l + f2.l])
+       end
+       return CustomFunction(l, f)
 end

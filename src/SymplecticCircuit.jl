@@ -1,105 +1,122 @@
 import JSON
-import Optim: optimize, minimizer
+import Optim: optimize, minimizer, BFGS
 import ReverseDiff: gradient
+import LinearAlgebra: tr
 
-function buildCircuit(dict)
-    n = dict["number_of_modes"]
-    ops = dict["symplectic_operations"]
+struct SymplecticCircuit
+    circuit ::AbstractArray{SymplecticOperation}
+    teleported ::Bool
+    inModes::AbstractArray
+    outModes::AbstractArray
+end 
 
-    if length(ops) < 1
-        throw("Operation list is empty")
+
+function regularize(n::Int64, type::SympType, params::AbstractArray)
+    if type == PhaseShifting
+        return params
+    elseif type == BeamSplitter
+        return Any[params..., n]
+    elseif type == Custom
+        return Any[params..., 2*n]
+    else
+        throw(ArgumentError("Operation undefined"))
     end
-
-    nameToFunction = Dict(
-        "beam_splitter" => (θ, i, j) -> beamSplitter(θ, i, j, n),
-        "phase_shifting" =>  phaseShifting,
-        "custom" => (params...) -> reshape([params...], (2*n, 2*n))
-    )
-
-    sympList = []
-    l = 0
-
-    for op in ops
-        name = op["name"]
-        if name == "_"
-            l += (2*n)^2
-        else
-            params = op["params"]
-            if name == "beam_splitter" && params[1] == "_"
-                l += 1
-            elseif name == "phase_shifting" && params[1] == "_"
-                l += n
-            end
-        end
-    end
-
-
-    f = (argVec) -> begin
-            i = 1
-            output = I(2*n)
-    
-            for op in ops
-                name = op["name"]
-                if name == "_"
-                    newOp = reshape(argVec[i:i+(2*n)^2-1], (2*n, 2*n))
-                    sympList = vcat(sympList, [i])
-                    i += (2*n)^2
-                else
-                    params = op["params"]
-                    if name == "beam_splitter" && params[1] == "_"
-                        newOp = beamSplitter(argVec[i], params[2], params[3], n)
-                        i += 1
-                    elseif name == "phase_shifting" && params[1] == "_"
-                        newOp = phaseShifting(argVec[i:i+n-1]...)
-                        i += n
-                    else
-                        newOp = nameToFunction[name](params...)
-                    end
-                end
-                output = newOp * output
-            end    
-            l = length(argVec)
-            return output
-        end
-
-    return f, n, l, sympList
 end
 
-function buildCircuitFromJSON(json)
+function buildCircuit(dict::Dict) ::SymplecticCircuit
+    try
+        n = dict["number_of_modes"]    
+    catch
+        throw("must specify number_of_modes")
+    end
+
+    try
+        ops = dict["symplectic_operations"]
+    catch
+        throw("operation list cannot be empty")
+    end
+
+    if length(ops) < 1
+        throw("operation list cannot be empty")
+    end
+
+    try
+        inModes = dict["input_modes"]
+        outModes = dict["output_modes"]
+        teleported = true
+    catch
+        inModes = []
+        outModes = []
+        teleported = false
+    end
+
+    op = ops[end]
+    type = toSympType(op["name"])
+    try
+        params = regularize(n, type, op["params"])
+    catch
+        if type == Custom
+            params = Any["_" for i in 1:2*n*2*n]
+        elseif type == PhaseShifting
+            params = Any["_" for i in 1:n]
+        end
+    end
+    circuit = [SymplecticOperation(n, type, Params)]
+    
+    for op in ops[end-1:-1:1]
+        type = toSympType(op["name"])
+        try
+            params = regularize(n, type, op["params"])
+        catch
+            if type == Custom
+                params = Any["_" for i in 1:2*n*2*n]
+            elseif type == PhaseShifting
+                params = Any["_" for i in 1:n]
+            end
+        end 
+        push!(circuit, SymplecticOperation(n, type, Params))
+    end
+
+    return SymplecticCircuit(circuit, teleported, inModes, outModes)
+end
+
+function buildCircuitFromJSON(json::AbstractString) ::SymplecticCircuit
     dict = JSON.parse(json)
     return buildCircuit(dict)
 end
 
-function buildCircuitFromFile(filename)
+function buildCircuitFromFile(filename::AbstractString) ::SymplecticCircuit
     dict = JSON.parsefile(filename)
     return buildCircuit(dict)
 end
 
-function buildCostFromFile(filename)
-    f, n, l, lst = buildCircuitFromFile(filename)
-    cost = (xs) -> begin
-        output = (x -> tr(transpose(x) * x))(f(xs))
-        for s in lst
-            output += (x -> tr(transpose(x) * x))(reshape(xs[s:s+(2*n)^2-1], (2*n, 2*n)))
-        end
-        return output
+function buildConstraint(sc::SymplecticCircuit, target=nothing) ::CustomFunction
+    so = reduce(*, sc.circuit)
+    constraint =  reduce(+, map(nonSymplecticity, sc.circuit))
+    constraint += nonSymplecticity(so)
+    if sc.teleported
+        constraint += nonSymplecticity(teleportation(so, sc.inModes, sc.outModes) - target)
     end
-    return cost, l
+    return constraint
 end
 
-
-f, n, l, lst = buildCircuitFromFile("test/test.json")
+function buildConstraintFromFile(filename) ::CustomFunction
+    sc = buildCircuitFromFile(filename)
+    return buildConstraintFromFile(sc)
+end
 
 function findSolutionFromFile(filename)
-    cost, l = buildCostFromFile("test/test.json")
+    constraint = buildConstraintFromFile(filename)
+
+    l, f = constraint.l, constraint.f
     function df!(G, xs)
-        Gs = gradient(cost, xs)
+        Gs = gradient(f, xs)
         for i in 1:length(xs)
             G[i] = Gs[i]
         end
     end
 
-    res = optimize(cost, df!,
+    res = optimize(f, df!,
                     rand(l),
                     method = BFGS(),
                     iterations = 1000)
