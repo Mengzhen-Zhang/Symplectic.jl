@@ -1,17 +1,17 @@
 import JSON
-import Optim: optimize, minimizer, BFGS
+import Optim
 import ReverseDiff: gradient
 import LinearAlgebra: tr
 
+export SymplecticCircuit, buildCircuit, buildCircuitFromFile, buildCircuitFromJSON, buildConstraint, buildConstraintFromFile, findSolutionFromFile
+
 struct SymplecticCircuit
-    circuit ::AbstractArray{SymplecticOperation}
-    teleported ::Bool
+    circuit::AbstractArray{SymplecticOperation}
     inModes::AbstractArray
     outModes::AbstractArray
-end 
+end
 
-
-function regularize(n::Int64, type::SympType, params::AbstractArray)
+function regularize(n::Int64, type::SympType, params::Params)::Params
     if type == PhaseShifting
         return params
     elseif type == BeamSplitter
@@ -23,107 +23,92 @@ function regularize(n::Int64, type::SympType, params::AbstractArray)
     end
 end
 
-function buildCircuit(dict::Dict) ::SymplecticCircuit
-    try
-        n = dict["number_of_modes"]    
-    catch
-        throw("must specify number_of_modes")
-    end
 
-    try
-        ops = dict["symplectic_operations"]
-    catch
-        throw("operation list cannot be empty")
-    end
-
-    if length(ops) < 1
-        throw("operation list cannot be empty")
-    end
-
-    try
-        inModes = dict["input_modes"]
-        outModes = dict["output_modes"]
-        teleported = true
-    catch
-        inModes = []
-        outModes = []
-        teleported = false
-    end
-
-    op = ops[end]
+function getArguments(n::Int64, op::Dict)
     type = toSympType(op["name"])
-    try
-        params = regularize(n, type, op["params"])
-    catch
+    params = get(op, "params",
         if type == Custom
             params = Any["_" for i in 1:2*n*2*n]
         elseif type == PhaseShifting
             params = Any["_" for i in 1:n]
-        end
-    end
-    circuit = [SymplecticOperation(n, type, Params)]
-    
-    for op in ops[end-1:-1:1]
-        type = toSympType(op["name"])
-        try
-            params = regularize(n, type, op["params"])
-        catch
-            if type == Custom
-                params = Any["_" for i in 1:2*n*2*n]
-            elseif type == PhaseShifting
-                params = Any["_" for i in 1:n]
-            end
-        end 
-        push!(circuit, SymplecticOperation(n, type, Params))
-    end
-
-    return SymplecticCircuit(circuit, teleported, inModes, outModes)
+        end)
+    return n, type, regularize(n, type, params)
 end
 
-function buildCircuitFromJSON(json::AbstractString) ::SymplecticCircuit
+function buildCircuit(dict::Dict)::SymplecticCircuit
+    n = get(dict, "number_of_modes", -1)
+    if n == -1
+        throw("must specify number_of_modes")
+    end
+
+    ops = get(dict, "symplectic_operations", [])
+    if length(ops) == 0
+        throw("operation list cannot be empty")
+    end
+
+    inModes = get(dict, "input_modes", [])
+    outModes = get(dict, "output_modes", [])
+
+    circuit = [SymplecticOperation(getArguments(n, op)...) for op in ops[end:-1:1]]
+
+    return SymplecticCircuit(circuit, inModes, outModes)
+end
+
+function buildCircuitFromJSON(json::AbstractString)::SymplecticCircuit
     dict = JSON.parse(json)
     return buildCircuit(dict)
 end
 
-function buildCircuitFromFile(filename::AbstractString) ::SymplecticCircuit
+function buildCircuitFromFile(filename::AbstractString)::SymplecticCircuit
     dict = JSON.parsefile(filename)
     return buildCircuit(dict)
 end
 
-function buildConstraint(sc::SymplecticCircuit, target=nothing) ::CustomFunction
+function buildConstraint(sc::SymplecticCircuit, target=nonSymplecticity)::CustomFunction
     so = reduce(*, sc.circuit)
-    constraint =  reduce(+, map(nonSymplecticity, sc.circuit))
-    constraint += nonSymplecticity(so)
-    if sc.teleported
-        constraint += nonSymplecticity(teleportation(so, sc.inModes, sc.outModes) - target)
+    l = so.Op.l
+    f = (xs::Vararg) -> begin
+        constraint = nonSymplecticity(so(xs...))
+        lcur = 1
+        for op in sc.circuit
+            lop = op.Op.l
+            if lop > 0
+                constraint += nonSymplecticity(op(xs[lcur:lcur+lop-1]...))
+            end
+            lcur += lop
+        end
+        tel = teleportation(so(xs...), sc.inModes, sc.outModes)
+        constraint += target(tel)
+        
+        return constraint
     end
-    return constraint
+
+    return CustomFunction(l, f)
 end
 
-function buildConstraintFromFile(filename) ::CustomFunction
+function buildConstraintFromFile(filename::AbstractString, target=nonSymplecticity)::CustomFunction
     sc = buildCircuitFromFile(filename)
-    return buildConstraintFromFile(sc)
+    return buildConstraint(sc, target)
 end
 
-function findSolutionFromFile(filename)
-    constraint = buildConstraintFromFile(filename)
+function findSolutionFromFile(filename, target=nonSymplecticity)
+    constraint = buildConstraintFromFile(filename, target)
 
-    l, f = constraint.l, constraint.f
+    l = constraint.l
+
+    f(xs) = constraint(xs...)
+
     function df!(G, xs)
-        Gs = gradient(f, xs)
+        grad = gradient(f, xs)
         for i in 1:length(xs)
-            G[i] = Gs[i]
+            G[i] = grad[i]
         end
     end
 
-    res = optimize(f, df!,
-                    rand(l),
-                    method = BFGS(),
-                    iterations = 1000)
+    res = Optim.optimize(f, df!,
+        rand(l),
+        method=Optim.LBFGS(),
+        iterations=1000)
 
     return res
 end
-
-    
-res = findSolutionFromFile("test/test.json")
-minimizer(res)
