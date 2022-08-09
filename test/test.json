@@ -1,0 +1,23 @@
+{
+  "number_of_modes": 4,
+  "symplectic_operations": [
+    { "name": "phase_shifting" },
+    { "name": "phase_shifting", "params": ["_", 2.0, 3.0, 4.0] },
+    { "name": "beam_splitter", "params": [1.0, 1, 2] },
+    { "name": "beam_splitter", "params": [2.0, 2, 3] },
+    { "name": "beam_splitter", "params": [3.0, 3, 4] },
+    { "name": "beam_splitter", "params": ["_", 1, 4] },
+    { "name": "custom" },
+    {
+      "name": "custom",
+      "params": [
+        1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0
+      ]
+    },
+    { "name": "phase_shifting", "params": [2.0, 3.0, 4.0, 1.0] }
+  ]
+}
