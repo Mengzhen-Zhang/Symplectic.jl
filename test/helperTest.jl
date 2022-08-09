@@ -1,6 +1,3 @@
-using Symplectic
-using Test
-
 @testset "CustomFunction" begin
     func1 = (x) -> x + 1
     func2 = (x, y) -> x * y

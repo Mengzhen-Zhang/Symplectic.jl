@@ -1,21 +1,17 @@
-using Symplectic
-using Test
-
 import Optim
 import LinearAlgebra: det
 
-@testset "regularize" begin
-    regularize = Symplectic.regularize
+import Symplectic: regularize, buildCircuitFromFile
 
+@testset "regularize" begin
     @test regularize(3, PhaseShifting, Any["_", 1.0, 2.0]) == Any["_", 1.0, 2.0]
     @test regularize(3, BeamSplitter, Any["_", 1, 2]) == Any["_", 1, 2, 3]
     @test regularize(1, Custom, Any["_", "_", "_", "_"]) == Any["_", "_", "_", "_", 2]
 end
 
 @testset "buildCircuit" begin
-    buildCircuitFromFile = Symplectic.buildCircuitFromFile
 
-    sc = buildCircuitFromFile("./test/test.json")
+    sc = buildCircuitFromFile("test.json")
     @test length(sc.circuit) == 9
     @test length(sc.inModes) == 0
     @test length(sc.outModes) == 0
@@ -42,6 +38,6 @@ end
 end
 
 @testset "buildConstraint" begin
-    sc = Symplectic.buildCircuitFromFile("./test/test.json")
+    sc = Symplectic.buildCircuitFromFile("test.json")
     @test Symplectic.buildConstraint(sc).l == 70
 end
