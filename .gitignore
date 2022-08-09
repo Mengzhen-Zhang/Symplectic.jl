@@ -23,3 +23,6 @@ docs/site/
 # environment.
 Manifest.toml
 Symplectic.docx
+
+#examples
+examples/*
