@@ -13,6 +13,9 @@ include("beam_splitter.jl")                     # <- dsum, phase_shifting
 include("random_phase_shifting.jl")             # <- phase_shifting
 include("local_symplectic_matrix.jl")           # <- dsum, phase_shifting
 include("random_local_symplectic_matrix.jl")    # <- local_symplectic_matrix
+include("symp_op.jl")                             # <- SymplecticForm, phase_shifting, beam_splitter, amplifier
+
+include("symp_net.jl")
 
 include("circulator.jl")                        
 
