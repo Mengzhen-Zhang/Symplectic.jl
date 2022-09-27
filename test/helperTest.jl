@@ -1,7 +1,11 @@
+<<<<<<< HEAD
 using Symplectic
 using Test
 
 @testset "Func" begin
+=======
+@testset "CustomFunction" begin
+>>>>>>> main
     func1 = (x) -> x + 1
     func2 = (x, y) -> x * y
     f1 = Func(1, func1)

@@ -1,5 +1,3 @@
-using Symplectic
-using Test
 using LinearAlgebra: I
 
 @testset "toSympType" begin
