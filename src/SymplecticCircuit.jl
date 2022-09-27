@@ -64,7 +64,7 @@ function buildCircuitFromFile(filename::AbstractString)::SymplecticCircuit
     return buildCircuit(dict)
 end
 
-function buildConstraint(sc::SymplecticCircuit, target=nonSymplecticity)::CustomFunction
+function buildConstraint(sc::SymplecticCircuit, target=nonSymplecticity)::Func
     so = reduce(*, sc.circuit)
     l = so.Op.l
     f = (xs::Vararg) -> begin
@@ -83,10 +83,10 @@ function buildConstraint(sc::SymplecticCircuit, target=nonSymplecticity)::Custom
         return constraint
     end
 
-    return CustomFunction(l, f)
+    return Func(l, f)
 end
 
-function buildConstraintFromFile(filename::AbstractString, target=nonSymplecticity)::CustomFunction
+function buildConstraintFromFile(filename::AbstractString, target=nonSymplecticity)::Func
     sc = buildCircuitFromFile(filename)
     return buildConstraint(sc, target)
 end

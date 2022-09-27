@@ -1,10 +1,12 @@
 name = "Symplectic"
 uuid = "32b24f23-0065-419a-aebb-272ab3b73786"
 authors = ["Mengzhen-Zhang <me@menngzhen-zhang.org>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
-
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
+ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
 
 [compat]
 julia = "1.7.3"
