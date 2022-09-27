@@ -17,7 +17,7 @@ function toSympType(name::AbstractString)
     end
 end
 
-function funcBuild(type::SympType, params::Params)::CustomFunction
+function funcBuild(type::SympType, params::Params)::Func
     l = length([0 for p in params if p == "_"])
 
     func = if type == PhaseShifting
@@ -43,14 +43,14 @@ function funcBuild(type::SympType, params::Params)::CustomFunction
         end
         func(ys...)
     end
-    return CustomFunction(l, f)
+    return Func(l, f)
 end
 
 
 struct SymplecticOperation
     n::Int64
-    Op::CustomFunction
-    function SymplecticOperation(n::Int64, Op::CustomFunction)
+    Op::Func
+    function SymplecticOperation(n::Int64, Op::Func)
         return new(n, Op)
     end
 end
@@ -68,7 +68,7 @@ function SymplecticOperation(m::AbstractMatrix)
     n = size(m, 1) ÷ 2
     l = 0
     f = (xs::Vararg) -> m
-    return SymplecticOperation(n, CustomFunction(l, f))
+    return SymplecticOperation(n, Func(l, f))
 end
 
 function dsum(s1::SymplecticOperation, s2::SymplecticOperation)::SymplecticOperation
@@ -78,7 +78,7 @@ function dsum(s1::SymplecticOperation, s2::SymplecticOperation)::SymplecticOpera
     op = (xs::Vararg) -> begin
         dsum(s1(xs[1:l1]...), s2(xs[l1+1:l]...))
     end
-    return SymplecticOperation(n, CustomFunction(l, op))
+    return SymplecticOperation(n, Func(l, op))
 end
 
 function dsum(s1::SymplecticOperation, n2::Int64)::SymplecticOperation
@@ -87,7 +87,7 @@ function dsum(s1::SymplecticOperation, n2::Int64)::SymplecticOperation
     op = (xs::Vararg) -> begin
         dsum(s1(xs...), I(2 * n2))
     end
-    return SymplecticOperation(n, CustomFunction(l, op))
+    return SymplecticOperation(n, Func(l, op))
 end
 
 function dsum(n1::Int64, s2::SymplecticOperation)::SymplecticOperation
@@ -96,7 +96,7 @@ function dsum(n1::Int64, s2::SymplecticOperation)::SymplecticOperation
     op = (xs::Vararg) -> begin
         dsum(I(2 * n1), s2(xs...))
     end
-    return SymplecticOperation(n, CustomFunction(l, op))
+    return SymplecticOperation(n, Func(l, op))
 end
 
 function Base.:*(s1::SymplecticOperation, s2::SymplecticOperation)::SymplecticOperation
@@ -119,7 +119,7 @@ function Base.inv(s::SymplecticOperation)
     op = (xs::Vararg) -> begin
         -Ω(2 * n) * transpose(s(xs...)) * Ω(2 * n)
     end
-    return SymplecticOperation(n, CustomFunction(l, op))
+    return SymplecticOperation(n, Func(l, op))
 end
 
 function teleportation(s::SymplecticOperation, inModes, outModes)::SymplecticOperation
@@ -131,13 +131,13 @@ function teleportation(s::SymplecticOperation, inModes, outModes)::SymplecticOpe
     op = (xs::Vararg) -> begin
         teleportation(s(xs...), inModes, outModes)
     end
-    return SymplecticOperation(n, CustomFunction(l, op))
+    return SymplecticOperation(n, Func(l, op))
 end
 
-function nonSymplecticity(s::SymplecticOperation)::CustomFunction
+function nonSymplecticity(s::SymplecticOperation)::Func
     l = s.Op.l
     f = (xs::Vararg) -> begin
         nonSymplecticity(s(xs...))
     end
-    return CustomFunction(l, f)
+    return Func(l, f)
 end
