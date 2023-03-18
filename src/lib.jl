@@ -70,8 +70,8 @@ function feedforward(S::AbstractMatrix, inModes::Vector, outModes::Vector)
        Out = vcat([[2 * i - 1, 2 * i] for i in outModes]...)
        ancModes = [i for i in allModes if !(i in inModes)]
        idlModes = [i for i in allModes if !(i in outModes)]
-       Usq = 2 * ancModes
-       Hm = 2 * idlModes
+       Usq = 2 * ancModes .- 1
+       Hm = 2 * idlModes .- 1
        SOutUsq = S[Out, Usq]
        SHmUsq = S[Hm, Usq]
        return - SOutUsq * Matrix(SHmUsq)^-1
@@ -94,8 +94,8 @@ function teleport(S::AbstractMatrix, inModes::Vector, outModes::Vector)
        Out = vcat([[2 * i - 1, 2 * i] for i in outModes]...)
        ancModes = [i for i in allModes if !(i in inModes)]
        idlModes = [i for i in allModes if !(i in outModes)]
-       Usq = 2 * ancModes
-       Hm = 2 * idlModes
+       Usq = 2 * ancModes .-1
+       Hm = 2 * idlModes .- 1
        SOutIn = S[Out, In]
        SHmIn = S[Hm, In]
        SOutUsq = S[Out, Usq]
@@ -432,11 +432,13 @@ function adaptiveMeasurement(F::AbstractMatrix, outModes::Vector, modes::Integer
     rowF, colF = size(F)
     E = transpose(F) * Ω
     G = - transpose(F) * Ω * F / 2
-    A = [I(rowF)            F        zeros(rowF, colF); 
-         zeros(colF, rowF)  I(colF)  zeros(colF, colF);
-         -E                 G        I(colF)           ]
-    A = toQPQPBasis(A)
-    other = [m for m in 1:modes if i ∉ outModes]
+    order = vcat([[i, i + colF] for i in 1:colF]...)
+    F1 = [F   zeros(rowF, colF)][:, order]
+    E1 = [zeros(colF, rowF); -E][order, :]
+    G1 = toQPQPBasis([I(colF)  zeros(colF, colF); G  I(colF)])
+    A = [I(rowF)     F1; 
+         E1          G1]
+    other = [m for m in 1:modes if m ∉ outModes]
     order = vcat(outModes, other)
     perm = invperm(order)
     perm = vcat([[2*p-1, 2*p] for p in perm]...)
