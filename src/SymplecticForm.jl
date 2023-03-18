@@ -14,6 +14,8 @@ using LinearAlgebra: checksquare, Factorization, promote_to_arrays, I,
                     UniformScaling
 using Base: require_one_based_indexing
 
+export SymplecticForm, Ω
+
 struct SymplecticForm{T<:Number} 
     λ::T
 end

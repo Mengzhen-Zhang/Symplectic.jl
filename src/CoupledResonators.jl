@@ -1,5 +1,12 @@
 using LinearAlgebra:
         Diagonal, copyto!, diag, I
+using SkewLinearAlgebra
+
+export CoupledResonators
+export addModes, addActive, addPassive
+export addGammaEx, addGammaIn
+export scatteringMatrix
+export dilatedScatteringMatrix
 
 struct CoupledResonators
     yr::AbstractMatrix
@@ -146,4 +153,7 @@ function scatteringMatrix(ω::Number, cr::CoupledResonators)
     return scatteringMatrix(ω, yr, yi, wr, wi, γin, γex)
 end
 
-
+function dilatedScatteringMatrix(ω::Number, cr::CoupledResonators)
+    S = scatteringMatrix(ω, cr)
+    return dilate(S)
+end
