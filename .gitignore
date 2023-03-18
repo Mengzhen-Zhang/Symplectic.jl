@@ -25,4 +25,4 @@ Manifest.toml
 Symplectic.docx
 
 #examples
-examples/*
+examples_local/*
