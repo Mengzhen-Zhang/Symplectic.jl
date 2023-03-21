@@ -1,4 +1,4 @@
-using LinearAlgebra: I, tr, UniformScaling, norm, isposdef, eigen
+using LinearAlgebra
 
 export inverseSymplecticCayleyTransform, invcayley
 export symplecticCayleyTransform, cayley
@@ -23,6 +23,7 @@ export randomPhaseShifiting, randps
 export localSymplecticMatrix, localsymp
 export randomLocalSymplecticMatrix, randlocalsymp
 export ⊗
+export squeezedVacuum, channel
 
 """
     inverseSymplecticCayleyTransform(S::AbstractMatrix)
@@ -45,7 +46,7 @@ const cayley = symplecticCayleyTransform
 
 Return the matrix norm of ``AΩA^T-Ω``.
 
-`A` is symplectic when return zero. Work for `SymplecticForm` and `UniformScaling` as well. 
+`A` is symplectic when return zero. Work for `SymplecticForm` and `UniformScaling` as well.
 """
 nonSymplecticity(J::Union{SymplecticForm,UniformScaling}) = 0
 function nonSymplecticity(A::AbstractMatrix)
@@ -229,7 +230,7 @@ function toQPQPBasis(mat::AbstractMatrix)
     if length(ord_n) < n
         push!(ord_n, n)
     end
-    
+
     return mat[ord_m, ord_n]
 end
 
@@ -436,11 +437,25 @@ function adaptiveMeasurement(F::AbstractMatrix, outModes::Vector, modes::Integer
     F1 = [F   zeros(rowF, colF)][:, order]
     E1 = [zeros(colF, rowF); -E][order, :]
     G1 = toQPQPBasis([I(colF)  zeros(colF, colF); G  I(colF)])
-    A = [I(rowF)     F1; 
+    A = [I(rowF)     F1;
          E1          G1]
     other = [m for m in 1:modes if m ∉ outModes]
     order = vcat(outModes, other)
     perm = invperm(order)
     perm = vcat([[2*p-1, 2*p] for p in perm]...)
     return A[perm, perm]
+end
+
+function channel(S::AbstractMatrix, Venv::AbstractMatrix, inModes::Vector, outModes::Vector)
+    n = size(S, 1) ÷ 2
+    inSys = vcat([[2*m-1, 2*m] for m in inModes]...)
+    outSys = vcat([[2*m-1, 2*m] for m in outModes]...)
+    inEnv = vcat([[2*m-1, 2*m] for m in 1:n if m ∉ inModes]...)
+    T = S[outSys, inSys]
+    N = S[outSys, inEnv] * Venv * transpose(S[outSys, inEnv])
+    return (T, N)
+end
+
+function squeezedVacuum(ξs)
+    return diagm(vcat([[exp(-ξ * log(10)), exp(ξ * log(10))] for ξ in ξs]...))
 end

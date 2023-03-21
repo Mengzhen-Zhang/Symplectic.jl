@@ -1,5 +1,4 @@
-using LinearAlgebra:
-        Diagonal, copyto!, diag, I
+using LinearAlgebra
 using SkewLinearAlgebra
 
 export CoupledResonators

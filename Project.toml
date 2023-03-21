@@ -4,8 +4,11 @@ authors = ["Mengzhen-Zhang <me@menngzhen-zhang.org>"]
 version = "0.1.2"
 
 [deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 SkewLinearAlgebra = "5c889d49-8c60-4500-9d10-5d3a22e2f4b9"
+Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
 
 [compat]
 julia = "1.8"
