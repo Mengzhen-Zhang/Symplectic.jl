@@ -14,6 +14,8 @@ using LinearAlgebra: checksquare, Factorization, promote_to_arrays, I,
                     UniformScaling
 using Base: require_one_based_indexing
 
+using ChainRulesCore
+
 export SymplecticForm, Ω
 
 struct SymplecticForm{T<:Number} 
@@ -185,11 +187,13 @@ tr(J::SymplecticForm{T}) where T = zero(T)
 (*)(B::BitArray{2}, J::SymplecticForm) = Array(B) * J
 function (*)(A::AbstractMatrix, J::SymplecticForm)
     B = zeros(Base._return_type(*, Tuple{eltype(A), eltype(J)}), size(A))
-    @inbounds for j in 1:size(B, 2)
-        if j % 2 == 0
-            B[:, j] = A[:, j-1] * J.λ
-        elseif j + 1 ≤ size(B, 2)
-            B[:, j] = - A[:, j+1] * J.λ
+    ignore_derivatives() do 
+        @inbounds for j in 1:size(B, 2)
+            if j % 2 == 0
+                B[:, j] = A[:, j-1] * J.λ
+            elseif j + 1 ≤ size(B, 2)
+                B[:, j] = - A[:, j+1] * J.λ
+            end
         end
     end
     return B

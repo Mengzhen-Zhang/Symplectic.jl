@@ -1,4 +1,5 @@
 using LinearAlgebra
+using ChainRulesCore
 
 export inverseSymplecticCayleyTransform, invcayley
 export symplecticCayleyTransform, cayley
@@ -441,8 +442,9 @@ function adaptiveMeasurement(F::AbstractMatrix, outModes::Vector, modes::Integer
          E1          G1]
     other = [m for m in 1:modes if m ∉ outModes]
     order = vcat(outModes, other)
-    perm = invperm(order)
-    perm = vcat([[2*p-1, 2*p] for p in perm]...)
+    perm = ChainRulesCore.ignore_derivatives() do 
+        vcat([[2*p-1, 2*p] for p in invperm(order)]...) 
+    end
     return A[perm, perm]
 end
 
