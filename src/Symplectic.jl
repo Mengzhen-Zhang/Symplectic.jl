@@ -6,4 +6,5 @@ module Symplectic
 
     include("CoupledResonators.jl")
 
+    include("SymplecticLayer.jl")
 end

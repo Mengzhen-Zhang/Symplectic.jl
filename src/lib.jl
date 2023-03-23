@@ -423,8 +423,12 @@ const randlocalsymp = randomLocalSymplecticMatrix
 function dilate(S::AbstractMatrix)
     M = invcayley(S)
     Mₐ = (M - transpose(M)) / 2
-    chol = skewchol(2 * Ω * Mₐ * Ω)
-    R = transpose(chol.R[:, invperm(chol.p)])
+    chol = ignore_derivatives() do
+           skewchol(2 * Ω * Mₐ * Ω) 
+        end
+    R = ignore_derivatives() do 
+        transpose(chol.R[:, invperm(chol.p)])
+    end 
     L = - Ω * transpose(R) * Ω
     S1 = I - L * inv(Ω * M + I / 2) * R
     return [S (I - S)*R; L*(I - S) S1]

@@ -200,11 +200,13 @@ function (*)(A::AbstractMatrix, J::SymplecticForm)
 end
 function (*)(J::SymplecticForm, A::AbstractMatrix)
     B = zeros(Base._return_type(*, Tuple{eltype(J), eltype(A)}), size(A))
-    @inbounds for i in 1:size(B, 1)
-        if i % 2 == 0
-            B[i, :] = - J.λ * A[i - 1, :]
-        elseif i + 1 ≤ size(B, 1)
-            B[i, :] = J.λ * A[i + 1, :]
+    ignore_derivatives() do
+        @inbounds for i in 1:size(B, 1)
+            if i % 2 == 0
+                B[i, :] = - J.λ * A[i - 1, :]
+            elseif i + 1 ≤ size(B, 1)
+                B[i, :] = J.λ * A[i + 1, :]
+            end
         end
     end
     return B
