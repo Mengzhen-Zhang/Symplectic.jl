@@ -1,6 +1,7 @@
 using ChainRulesCore
 
 export SymplecticLayer, SymplecticCircuit, symplecticLayer
+export GaussianChannelLayer, GaussianChannelCircuit, gaussianChannelLayer
 
 struct SymplecticLayer
     num_of_args::Integer
@@ -116,33 +117,34 @@ struct GaussianChannelCircuit
             gl = A * postps * raw * preps
             in_indices = vcat([[2*m-1, 2*m] for m in inModes]...)
             out_indices = vcat([[2*m-1, 2*m] for m in outModes]...)
-            GaussianChannelLayer(gl.args + length(ancModes), length(outModes),
+            GaussianChannelLayer(gl.num_of_args, length(outModes),
                 x -> begin
-                    T = gl.T(x[begin:length(x) - length(ancModes)])
+                    T = gl.T(x[begin:length(x)])
                     T[out_indices, in_indices]
                 end,
                 x -> begin
-                    T = gl.T(x[begin:length(x) - length(ancModes)])
-                    N = gl.N(x[begin:length(x) - length(ancModes)])
-                    (T*squeezedVacuum(fill(squeezing, length(ancModes)))*transpose(T) 
+                    T = gl.T(x[begin:length(x)])
+                    N = gl.N(x[begin:length(x)])
+                    anc_indices = vcat([[2*m-1, 2*m] for m in ancModes]...)
+                    (T[:, anc_indices]*squeezedVacuum(fill(squeezing, length(ancModes)))*transpose(T[:, anc_indices]) 
                     + N)[out_indices, out_indices]
                 end)
         else
             gl = raw
             in_indices = vcat([[2*m-1, 2*m] for m in inModes]...)
             out_indices = vcat([[2*m-1, 2*m] for m in outModes]...)
-            GaussianChannelLayer(gl.args, gl.num_of_modes,
+            GaussianChannelLayer(gl.num_of_args, gl.num_of_modes,
                 x -> gl.T(x[begin:length(x)])[out_indices, in_indices],
                 x -> begin
-                    T = gl.T(x[begin:length(x) - length(ancModes)])
-                    N = gl.N(x[begin:length(x) - length(ancModes)])
-                    (T*squeezedVacuum(fill(squeezing, length(ancModes)))*transpose(T) 
-                    + N)[out_indices, out_indices]
+                    T = gl.T(x[begin:length(x)])
+                    N = gl.N(x[begin:length(x)])
+                    anc_indices = vcat([[2*m-1, 2*m] for m in ancModes]...)
+                    (T[:, anc_indices]*transpose(T[:, anc_indices]) + N)[out_indices, out_indices]
                 end)
         end
         num_of_args, T, N = final.num_of_args, final.T, final.N
         return new(layers, is_adaptive, inModes, outModes, ancModes, idlModes,
-        num_of_args, num_of_modes, T, N)
+        num_of_args, num_of_modes, squeezing, T, N)
     end
 end
 
@@ -164,6 +166,34 @@ Base.:*(gl1::GaussianChannelLayer, gl2::GaussianChannelLayer) = GaussianChannelL
                 T1 * N2 * transpose(T1) + N1
             end
         )
+Base.:*(sl::SymplecticLayer, gl::GaussianChannelLayer) = GaussianChannelLayer(
+    sl.num_of_args + gl.num_of_args,
+    sl.num_of_modes,
+    x -> begin
+        S = sl.S(x[begin : sl.num_of_args])
+        T = gl.T(x[sl.num_of_args + 1 : end])
+        S * T
+    end,
+    x -> begin
+        S = sl.S(x[begin : sl.num_of_args])
+        N = gl.N(x[sl.num_of_args + 1 : end])
+        S * N * transpose(S)
+    end
+)
+
+Base.:*(gl::GaussianChannelLayer, sl::SymplecticLayer) = GaussianChannelLayer(
+    sl.num_of_args + gl.num_of_args,
+    gl.num_of_modes,
+    x -> begin
+        T = gl.T(x[begin : gl.num_of_args])
+        S = sl.S(x[gl.num_of_args + 1 : end])
+        T * S
+    end,
+    x -> begin
+        N = gl.N(x[begin : gl.num_of_args])
+        N
+    end
+)
  
 function gaussianChannelLayer(ω::Float64, cr::CoupledResonators)
     num_of_modes = size(cr.γex, 1) * 2
@@ -171,7 +201,7 @@ function gaussianChannelLayer(ω::Float64, cr::CoupledResonators)
     return GaussianChannelLayer(
         0, 
         num_of_modes,
-        x -> Sd[begin:num_of_modes, begin:num_of_modes],
-        x -> Sd[begin:num_of_modes, num_of_modes+1:end] * transpose(Sd[begin:num_of_modes, num_of_modes+1:end])
+        x -> Sd[begin:2*num_of_modes, begin:2*num_of_modes],
+        x -> Sd[begin:2*num_of_modes, 2*num_of_modes+1:end] * transpose(Sd[begin:2*num_of_modes, 2*num_of_modes+1:end])
     )
 end
