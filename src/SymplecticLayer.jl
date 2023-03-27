@@ -6,6 +6,7 @@ export GaussianChannelLayer, GaussianChannelCircuit, gaussianChannelLayer
 struct SymplecticLayer
     num_of_args::Integer
     num_of_modes::Integer
+    is_symplectic::Bool
     S::Function
 end
 
@@ -15,6 +16,7 @@ Base.:*(sl::SymplecticLayer) = sl
 Base.:*(sl1::SymplecticLayer, sl2::SymplecticLayer) = SymplecticLayer(
         sl1.num_of_args + sl2.num_of_args,
         sl1.num_of_modes,
+        sl1.is_symplectic && sl2.is_symplectic,
         x -> sl1.S(x[begin : sl1.num_of_args]) * sl2.S(x[sl1.num_of_args + 1 : end])
     )
 
@@ -35,17 +37,20 @@ struct SymplecticCircuit
         preps = SymplecticLayer(
             length(ancModes),
             num_of_modes,
+            true,
             x -> phaseShifting([m ∈ ancModes ? x[findfirst(==(m), ancModes)] : 0 for m in 1:num_of_modes]...)
         )
         postps = SymplecticLayer(
             length(idlModes),
             num_of_modes,
+            true,
             x -> phaseShifting([m ∈ idlModes ? x[findfirst(==(m), idlModes)] : 0 for m in 1:num_of_modes]...)
         )
         len_of_F = 2 * length(outModes) * length(idlModes)
         raw = *(layers...)
         A = SymplecticLayer(len_of_F,
             num_of_modes,
+            true,
             x -> adaptiveMeasurement(
                 [reshape(x[begin:len_of_F], (2*length(outModes), length(idlModes))); 
                  zeros(2*length(envModes), length(idlModes))],
@@ -69,6 +74,7 @@ function symplecticLayer(ω::Float64, cr::CoupledResonators)
     return SymplecticLayer(
         0,
         size(cr.γex, 1) * 2,
+        true,
         x -> dilatedScatteringMatrix(ω, cr)
     )
 end
@@ -98,16 +104,19 @@ struct GaussianChannelCircuit
         preps = SymplecticLayer(
             length(ancModes),
             num_of_modes,
+            true,
             x -> phaseShifting([m ∈ ancModes ? x[findfirst(==(m), ancModes)] : 0 for m in 1:num_of_modes]...)
         )
         postps = SymplecticLayer(
             length(idlModes),
             num_of_modes,
+            true,
             x -> phaseShifting([m ∈ idlModes ? x[findfirst(==(m), idlModes)] : 0 for m in 1:num_of_modes]...)
         )
         len_of_F = 2 * length(outModes) * length(idlModes)
         A = SymplecticLayer(len_of_F,
             num_of_modes,
+            true,
             x -> adaptiveMeasurement(
                 reshape(x[begin:len_of_F], (2*length(outModes), length(idlModes))),
                 outModes, num_of_modes)
