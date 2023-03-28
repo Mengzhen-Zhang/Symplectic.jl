@@ -300,7 +300,6 @@ function spectrum(M::AbstractMatrix)
        return [spec, toQPQPBasis(S)]
 end
 
-
 """
     dsum(M1, M2, M3...)
 

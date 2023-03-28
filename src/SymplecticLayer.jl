@@ -234,3 +234,24 @@ function freeSymplecticMatrix(num_of_modes::Integer)
         S
     )
 end
+
+function freeSymplecticMatrix(num_of_modes::Integer, modes::AbstractVector{Integer})
+    n = 2*length(modes)
+    num_of_args = n*(n+1)÷2
+    S(x) = begin
+        M0 = diagm([i-1=>x[n*(n+1)÷2-(n-i+1)*(n-i+2)÷2+1 : n*(n+1)÷2-(n-i+1)*(n-i+2)÷2+1+n-i]  for i in 1:n]...)
+        M = (M0 + transpose(M0)) / 2
+        S1 = symplecticCayleyTransform(M) ⊕ I(num_of_modes - length(modes))
+        perm = ChainRulesCore.ignore_derivatives do
+            other = [m for m in 1:num_of_modes if m ∉ modes]
+            order = vcat(modes, other)
+            vcat([[2*p-1, 2*p] for p in invperm(order)]...)
+        end
+        S1[perm, perm]
+    end
+    return SymplecticLayer(
+        num_of_args,
+        num_of_modes,
+        S
+    )
+end
