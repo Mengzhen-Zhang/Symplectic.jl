@@ -464,3 +464,5 @@ end
 function squeezedVacuum(ξs)
     return diagm(vcat([[exp(-ξ * log(10)), exp(ξ * log(10))] for ξ in ξs]...))
 end
+
+hs_norm(A::AbstractMatrix) = sqrt(tr(A * transpose(A)))
