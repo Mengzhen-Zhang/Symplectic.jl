@@ -1,12 +1,14 @@
 using ChainRulesCore
+import Optim
+import LinearAlgebra:diagm
 
 export SymplecticLayer, SymplecticCircuit, symplecticLayer
 export GaussianChannelLayer, GaussianChannelCircuit, gaussianChannelLayer
+export freeSymplecticMatrix
 
 struct SymplecticLayer
     num_of_args::Integer
     num_of_modes::Integer
-    is_symplectic::Bool
     S::Function
 end
 
@@ -16,9 +18,7 @@ Base.:*(sl::SymplecticLayer) = sl
 Base.:*(sl1::SymplecticLayer, sl2::SymplecticLayer) = SymplecticLayer(
         sl1.num_of_args + sl2.num_of_args,
         sl1.num_of_modes,
-        sl1.is_symplectic && sl2.is_symplectic,
-        x -> sl1.S(x[begin : sl1.num_of_args]) * sl2.S(x[sl1.num_of_args + 1 : end])
-    )
+        x -> sl1.S(x[begin : sl1.num_of_args]) * sl2.S(x[sl1.num_of_args + 1 : end]))
 
 struct SymplecticCircuit
     layers::AbstractVector{SymplecticLayer}
@@ -37,20 +37,17 @@ struct SymplecticCircuit
         preps = SymplecticLayer(
             length(ancModes),
             num_of_modes,
-            true,
             x -> phaseShifting([m ∈ ancModes ? x[findfirst(==(m), ancModes)] : 0 for m in 1:num_of_modes]...)
         )
         postps = SymplecticLayer(
             length(idlModes),
             num_of_modes,
-            true,
             x -> phaseShifting([m ∈ idlModes ? x[findfirst(==(m), idlModes)] : 0 for m in 1:num_of_modes]...)
         )
         len_of_F = 2 * length(outModes) * length(idlModes)
         raw = *(layers...)
         A = SymplecticLayer(len_of_F,
             num_of_modes,
-            true,
             x -> adaptiveMeasurement(
                 [reshape(x[begin:len_of_F], (2*length(outModes), length(idlModes))); 
                  zeros(2*length(envModes), length(idlModes))],
@@ -74,7 +71,6 @@ function symplecticLayer(ω::Float64, cr::CoupledResonators)
     return SymplecticLayer(
         0,
         size(cr.γex, 1) * 2,
-        true,
         x -> dilatedScatteringMatrix(ω, cr)
     )
 end
@@ -87,7 +83,7 @@ struct GaussianChannelLayer
 end
 
 struct GaussianChannelCircuit
-    layers::AbstractVector{GaussianChannelLayer}
+    layers::AbstractVector{Union{GaussianChannelLayer, SymplecticLayer}}
     is_adaptive::Bool
     inModes::AbstractVector{Integer}
     outModes::AbstractVector{Integer}
@@ -104,19 +100,16 @@ struct GaussianChannelCircuit
         preps = SymplecticLayer(
             length(ancModes),
             num_of_modes,
-            true,
             x -> phaseShifting([m ∈ ancModes ? x[findfirst(==(m), ancModes)] : 0 for m in 1:num_of_modes]...)
         )
         postps = SymplecticLayer(
             length(idlModes),
             num_of_modes,
-            true,
             x -> phaseShifting([m ∈ idlModes ? x[findfirst(==(m), idlModes)] : 0 for m in 1:num_of_modes]...)
         )
         len_of_F = 2 * length(outModes) * length(idlModes)
         A = SymplecticLayer(len_of_F,
             num_of_modes,
-            true,
             x -> adaptiveMeasurement(
                 reshape(x[begin:len_of_F], (2*length(outModes), length(idlModes))),
                 outModes, num_of_modes)
@@ -212,5 +205,32 @@ function gaussianChannelLayer(ω::Float64, cr::CoupledResonators)
         num_of_modes,
         x -> Sd[begin:2*num_of_modes, begin:2*num_of_modes],
         x -> Sd[begin:2*num_of_modes, 2*num_of_modes+1:end] * transpose(Sd[begin:2*num_of_modes, 2*num_of_modes+1:end])
+    )
+end
+
+struct Sp <: Optim.Manifold
+end
+Optim.retract!(S::Sp, x) = begin
+    M0 = Symplectic.inverseSymplecticCayleyTransform(x)
+    M = (M0 + transpose(M0)) / 2
+    x .= Symplectic.symplecticCayleyTransform(M)
+end
+Optim.project_tangent!(S::Sp, g, x) = begin
+    n0 = Symplectic.Ω * x
+    g .-= tr(transpose(g) * n0) * n0 / tr(transpose(n0) * n0)
+end
+
+function freeSymplecticMatrix(num_of_modes::Integer)
+    n = 2*num_of_modes
+    num_of_args = n*(n+1)÷2
+    S(x) = begin
+        M0 = diagm([i-1=>x[n*(n+1)÷2-(n-i+1)*(n-i+2)÷2+1 : n*(n+1)÷2-(n-i+1)*(n-i+2)÷2+1+n-i]  for i in 1:n]...)
+        M = (M0 + transpose(M0)) / 2
+        symplecticCayleyTransform(M)
+    end
+    return SymplecticLayer(
+        num_of_args,
+        num_of_modes,
+        S
     )
 end

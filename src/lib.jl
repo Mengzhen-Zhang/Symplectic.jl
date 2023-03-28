@@ -270,7 +270,7 @@ function preIwasawaFactorization(S::AbstractMatrix)
        Y = AAtBBt^(-1 / 2) * B
        return map(toQPQPBasis, [
               [I(n) zeros(n, n); P I(n)],
-              [L zeros(n, n); zeros(n, n) L^-1],
+              [L zeros(n, n); zeros(n, n) transpose(L)^-1],
               [X Y; -Y X]
        ])
 end
