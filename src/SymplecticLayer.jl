@@ -209,14 +209,13 @@ function gaussianChannelLayer(ω::Float64, cr::CoupledResonators)
     )
 end
 
-struct Sym <: Optim.Manifold
-end
-Optim.retract!(S::Sym, x) = begin
-    x .= (x + transpose(x)) / 2
-end
-Optim.project_tangent!(S::Sym, g, x) = begin
-    g .-= (g - transpose(g)) / 2
-end
+struct Sym <: Optim.Manifold end
+Optim.retract!(S::Sym, x) = (x .= (x + transpose(x)) / 2)
+Optim.project_tangent!(S::Sym, g, x) = (g .-= (g - transpose(g)) / 2)
+
+struct Asym <: Optim.Manifold end
+Optim.retract!(S::Asym, x) = (x .= (x - transpose(x)) / 2)
+Optim.project_tangent!(S::Asym, g, x) = (g .-= (g + transpose(g)) / 2)
 
 function freeSymplecticMatrix(num_of_modes::Integer; sign=1)
     n = 2*num_of_modes
