@@ -5,6 +5,7 @@ import LinearAlgebra:diagm
 export SymplecticLayer, SymplecticCircuit, symplecticLayer
 export GaussianChannelLayer, GaussianChannelCircuit, gaussianChannelLayer
 export freeSymplecticMatrix
+export Sym
 
 struct SymplecticLayer
     num_of_args::Integer
@@ -208,16 +209,13 @@ function gaussianChannelLayer(ω::Float64, cr::CoupledResonators)
     )
 end
 
-struct Sp <: Optim.Manifold
+struct Sym <: Optim.Manifold
 end
-Optim.retract!(S::Sp, x) = begin
-    M0 = Symplectic.inverseSymplecticCayleyTransform(x)
-    M = (M0 + transpose(M0)) / 2
-    x .= Symplectic.symplecticCayleyTransform(M)
+Optim.retract!(S::Sym, x) = begin
+    x .= (x + transpose(x)) / 2
 end
-Optim.project_tangent!(S::Sp, g, x) = begin
-    n0 = Symplectic.Ω * x
-    g .-= tr(transpose(g) * n0) * n0 / tr(transpose(n0) * n0)
+Optim.project_tangent!(S::Sym, g, x) = begin
+    g .-= (g - transpose(g)) / 2
 end
 
 function freeSymplecticMatrix(num_of_modes::Integer; sign=1)
