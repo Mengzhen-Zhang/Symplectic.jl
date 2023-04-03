@@ -165,7 +165,7 @@ Base.:*(gl1::GaussianChannelLayer, gl2::GaussianChannelLayer) = GaussianChannelL
             x -> begin
                 N1 = gl1.N(x[begin : gl1.num_of_args])
                 N2 = gl2.N(x[gl1.num_of_args + 1 : end])
-                T2 = gl2.T(x[gl1.num_of_args + 1 : end])
+                T1 = gl1.T(x[gl1.num_of_args + 1 : end])
                 T1 * N2 * transpose(T1) + N1
             end
         )
