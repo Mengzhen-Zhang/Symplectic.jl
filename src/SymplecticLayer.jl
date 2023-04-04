@@ -217,22 +217,9 @@ struct Asym <: Optim.Manifold end
 Optim.retract!(S::Asym, x) = (x .= (x - transpose(x)) / 2)
 Optim.project_tangent!(S::Asym, g, x) = (g .-= (g + transpose(g)) / 2)
 
-function freeSymplecticMatrix(num_of_modes::Integer; sign=1)
-    n = 2*num_of_modes
-    num_of_args = n*(n+1)÷2
-    S(x) = begin
-        M0 = diagm([i-1=>x[n*(n+1)÷2-(n-i+1)*(n-i+2)÷2+1 : n*(n+1)÷2-(n-i+1)*(n-i+2)÷2+1+n-i]  for i in 1:n]...)
-        M = (M0 + transpose(M0)) / 2
-        sign * symplecticCayleyTransform(M)
-    end
-    return SymplecticLayer(
-        num_of_args,
-        num_of_modes,
-        S
-    )
-end
-
-function freeSymplecticMatrix(num_of_modes::Integer, modes::AbstractVector; sign=1)
+function freeSymplecticMatrix(num_of_modes::Integer;
+                              modes::AbstractVector = [1:num_of_modes;],
+                              sign::AbstractMatrix = I)
     n = 2*length(modes)
     num_of_args = n*(n+1)÷2
     S(x) = begin
