@@ -1,31 +1,31 @@
 
 # Table of Contents
 
-1.  [This document is under construction.](#org71300e8)
-2.  [Symplectic.jl](#orge929fe6)
-    1.  [Mathematical functions](#org1e21683)
-        1.  [Symplectic form](#org30c4bab)
-        2.  [Symplectic cayley transform](#org407455b)
+1.  [This document is under construction.](#orgbe30199)
+2.  [Symplectic.jl](#org1ef4842)
+    1.  [Mathematical functions](#orgc2c34e4)
+        1.  [Symplectic form](#orga837937)
+        2.  [Symplectic cayley transform](#org52a247d)
 
 
-<a id="org71300e8"></a>
+<a id="orgbe30199"></a>
 
 # This document is under construction.
 
 
-<a id="orge929fe6"></a>
+<a id="org1ef4842"></a>
 
 # Symplectic.jl
 
 A Julia package for construction and manipulation of symplectic matrices, Gaussian channels (as in quantum information), and circuits comprised of symplectic matrices and Gaussian channels.
 
 
-<a id="org1e21683"></a>
+<a id="orgc2c34e4"></a>
 
 ## Mathematical functions
 
 
-<a id="org30c4bab"></a>
+<a id="orga837937"></a>
 
 ### Symplectic form
 
@@ -34,10 +34,10 @@ $$\Omega = \oplus_{i=1}^n \begin{pmatrix}
 0 & 1 \\
 -1 & 0
 \end{pmatrix},$$
-i.e., a 2n-by-2n block-diagonal matrix with n identical sub-blocks. This matrix is provided as a struct `SymplecticForm` which resembles the `UniformScaling` struct in `LinearAlgebra`. Similar as the symbol `I` for `UniformScaling`, the symbol `\Omega` is reserved for `SymplecticForm`. One can quickly create the skew-symmetric matrix as shown above by calling `\Omega(2n)` where `2n` represents the size of the matrix. Just as `I`, `\Omega` can be used without an argument. That is to say, basis matrix arithmetics for `\Omega` are supported so long as the size of the matrix can be inferred from the context.
+i.e., a 2n-by-2n block-diagonal matrix with n identical sub-blocks. This matrix is provided as a struct `SymplecticForm` which resembles the `UniformScaling` struct in `LinearAlgebra`. Similar as the symbol `I` for `UniformScaling`, the symbol `$\Omega$` is reserved for `SymplecticForm`. One can quickly create the skew-symmetric matrix as shown above by calling `$\Omega$(2n)` where `2n` represents the size of the matrix. Just as `I`, `$\Omega$` can be used without an argument. That is to say, basis matrix arithmetics for `$\Omega$` are supported so long as the size of the matrix can be inferred from the context.
 
 
-<a id="org407455b"></a>
+<a id="org52a247d"></a>
 
 ### Symplectic cayley transform
 

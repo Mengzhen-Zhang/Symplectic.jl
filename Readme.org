@@ -5,11 +5,21 @@ A Julia package for construction and manipulation of symplectic matrices, Gaussi
 ** Mathematical functions
 *** Symplectic form
 Throughout the document, the skew-symmetric form defining the symplectic matrix is of the following form
-$$\Omega = \oplus_{i=1}^n \begin{pmatrix}
+\[\Omega = \oplus_{i=1}^n \begin{pmatrix}
 0 & 1 \\
 -1 & 0
-\end{pmatrix},$$
-i.e., a 2n-by-2n block-diagonal matrix with n identical sub-blocks. This matrix is provided as a struct ~SymplecticForm~ which resembles the ~UniformScaling~ struct in ~LinearAlgebra~. Similar as the symbol ~I~ for ~UniformScaling~, the symbol ~\Omega~ is reserved for ~SymplecticForm~. One can quickly create the skew-symmetric matrix as shown above by calling ~\Omega(2n)~ where ~2n~ represents the size of the matrix. Just as ~I~, ~\Omega~ can be used without an argument. That is to say, basis matrix arithmetics for ~\Omega~ are supported so long as the size of the matrix can be inferred from the context.
+\end{pmatrix},\]
+i.e., a 2n-by-2n block-diagonal matrix with n identical sub-blocks. This matrix is provided as a struct ~SymplecticForm~ which resembles the ~UniformScaling~ struct in ~LinearAlgebra~. Similar as the symbol ~I~ for ~UniformScaling~, the symbol ~$\Omega$~ is reserved for ~SymplecticForm~. One can quickly create the skew-symmetric matrix as shown above by calling ~$\Omega$(2n)~ where ~2n~ represents the size of the matrix. Just as ~I~, ~$\Omega$~ can be used without an argument. That is to say, basis matrix arithmetics for ~$\Omega$~ are supported so long as the size of the matrix can be inferred from the context.
+
+*** Basis of the symplectic vector space
+With the explicit form of ~$\Omega$~ as is specified above, the basis of the underlying symplectic vector space is accordingly fixed by default. We refer to this default choice of symplectic basis the *QPQP* basis. However, for certain use cases, it is more convenient to work with an alternative basis, referred to as the *QQPP* basis, in which the symplectic form is of the following form
+\[
+\Omega = \begin{pmatrix}
+ 0_n & I_n \\
+ -I_n & 0_n
+\end{pmatrix}
+\]
+with $0_n$ represents an n-by-n zero matrix and $I_n$ an n-by-n identity matrix. The function ~toQQPPBasis~ (respectively, ~toQPQPBasis~) is provided to convert a matrix represented in the QPQP (respectively, QQPP) basis to the QQPP (respectively, QPQP) basis.
 
 *** Symplectic cayley transform
 Cayley transform is an important technique to parametrize orthogonal or unitary matrices. With appropriate modification, it can also be used to parametrize other groups including the group of symplectic matrices.
@@ -22,3 +32,47 @@ i.e., the ~M~ thus obtained should be the same as that in the equation above.
 
 The symplectic cayley transform is implemented as a single-argument funciton ~symplecticCayleyTransform~ (with alias ~cayley~), and its inverse as ~inverseSymplecticCayleyTransform~ (with alias ~invcaylay~).
 
+*** Pre-Iwasawa factorization
+A symplectic matrix $S$ can always be written as the multiplication of three symplectic matrices of specific structures, which is known as the pre-Iwasawa factorization. The factorization can be specificied by the following equation (note that the matrices are represented in the *QQPP* basis) 
+\[
+ S = \begin{pmatrix}
+    I_n & 0_n \\
+    P & I_n
+ \end{pmatrix}
+ \begin{pmatrix}
+    L & 0_n \\
+    0_n & (L^T)^{-1}
+ \end{pmatrix}
+ \begin{pmatrix}
+    X & Y \\
+   -Y & X
+ \end{pmatrix}.
+\]
+Here, $P$ is an n-by-n symmetric matrix; $L$ is an n-by-n non-singular matrix; $X$ and $Y$ are n-by-n matrices satisfying that $X+iY$ is a unitary matrix, i.e., the right-most of the three matrices on the right-hand-side of the above equation is an orthogonal matrixb. The pre-Iwasawa factorization is unique and well-defined for all symplectic matrices.
+
+The pre-Iwasawa factorization is implemented as the function ~preIwasawaFactorization~ (or ~preiwa~), which yields a tuple of three symplectic matrices as are on the right-hand-side of the above equation.
+
+*** Utilities
+We provide ~hs_norm~ to facilliate the calculation of the Hibert-Schmidt norm of a matrix. That is, ~hs_norm(M)~ yields $\mbox{tr}(M^T*M)$.
+
+To check whether a matrix is symplectic, the user can use the function ~nonSymplecticity~. It takes a matrix $S$ as the input and yields the Hilber-Schmidt norm of $S^T \Omega S - \Omega$.
+
+The function ~dsum~ (or the binary operator ~$\oplus$~) is used to produce direct sum of two matrices. It can also take more than two matrices as input: ~dsum(A1, A2, ...)~
+
+The binary operator ~\otimes~ is assigned to ~Base.kron~ to allow tensor product.
+
+
+** Physical functions
+Mode, quadrature, ...
+*** Phase shifting
+*** Beam-splitter
+*** Two-mode squeezing
+*** Circulator
+*** Teleportaton
+*** Interferometer
+*** Dilation
+*** Gaussian channel
+*** Squeezed vacuum
+*** Coupled-mode system
+
+** Circuit

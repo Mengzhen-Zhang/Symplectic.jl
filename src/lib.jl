@@ -25,6 +25,7 @@ export localSymplecticMatrix, localsymp
 export randomLocalSymplecticMatrix, randlocalsymp
 export ⊗
 export squeezedVacuum, channel
+export hs_norm
 
 """
     inverseSymplecticCayleyTransform(S::AbstractMatrix)
