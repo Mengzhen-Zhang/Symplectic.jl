@@ -103,7 +103,7 @@ function teleport(S::AbstractMatrix, inModes::Vector, outModes::Vector)
        SHmIn = S[Hm, In]
        SOutUsq = S[Out, Usq]
        SHmUsq = S[Hm, Usq]
-       return SOutIn - SOutUsq * Matrix(SHmUsq)^-1 * SHmIn
+    return SOutIn - SOutUsq * Matrix(SHmUsq)^-1 * SHmIn
 end
 
 # ↑(m, i) = 2 * m - (i % 2)

@@ -63,16 +63,58 @@ The binary operator ~\otimes~ is assigned to ~Base.kron~ to allow tensor product
 
 
 ** Physical functions
-Mode, quadrature, ...
+In physics, symplectic matrices significantly simplifies the analysis of unitary Gaussian processes transforming quadratures operators into their linear combinations. Representations of some commonly used physical componets are provided.
+
 *** Phase shifting
+The 2-by-2 symplectic matrix corresponding to a single-mode phase-shifting operation can be created by the ~phaseShifting~ with a single real argument. When multiple arguments are given, e.g. ~phaseShifting(x1, x2, x3), it yields the symplectic matrix correpsonding to the simultaneous application of multiple single-mode operations with angles specificed correspondingly by the 
+arguments.
+
 *** Beam-splitter
+The function ~beamSplitter~ yields a 4-by-4 symplectic matrix corresponding to a two-mode beam-splitter, with the angle specificed by the input argument.
+
+The alternative method ~beamSplitter(angle, m1, m2, n)~ yields a beam-splitter symplectic matrix between mode m1 and m2 in an n-mode system. When n is omitted, the ~max(m1, m2)~ will be used as the total number of modes in the system.
+
 *** Two-mode squeezing
+The symplectic matrix representation of a two-mode squeezing operation can be created by the function ~amplifier~ with its argument specifing the gain coefficient.
+
+When called with ~amplifier(G, m1, m2, n)~, it yields the two-mode squeezing operation between the mode m1 and the mode m2 in a n-mode system. When ~n~ is omitted, ~max(m1, m2)~ will be used as the number of modes of the whole system.
+
 *** Circulator
-*** Teleportaton
+The function ~cirulator(perm::Vector)~ yields a symplectic matrix of a circulator, i.e., a permutation of modes specified by the vector ~perm~. Alternatively, it supports the method ~cirulator(perm...)~.
+
+*** Adpative control
+The function ~teleport(S::AbstractMatrix, inModes::Vector, outModes::Vector)~ implements of the main result in Phys. Rev. Lett. 120, 020502[fn:1]. Here, ~S~ represents a 2n-by-2n symplectic matrix representing a unitary Gaussian operatio on an n-mode system. ~inModes~ and ~outModes~ are vectors of equal sizes representing the input and output modes. Let ~ancModes~ denote the vector of the modes that are not in ~inModes~, and ~idlModes~ the vector of the modes that are not in ~outModes~. Let ~Usq~ denote ~2*ancModes.-1~, and ~Hm~ denote ~2*idlModes.-1~, ~In~ denote the set of indices either in ~2*inModes.-1~ or ~2*inModes~, and ~Out~ denote the set of indices either in ~2*outModes.-1~ or ~2*outModes~. This function outputs ~S[Out,In]-S[Out,Usq]*(S[Hm,Usq])^(-1)*S[Hm,In]~ which is guaranteed to be a symplectic matrix so long as ~S[Hm,Usq]~ is non-singular.
+
+The function ~feedforward(S::AbstractMatrix, inModes::Vector, outModes::Vector)~ yields the product ~-S[Out,USq]*(S[Hm,Usq])^(-1)~ directly.
+
+The function ~adaptiveMeasurement(F::AbstractMatrix, outModes::Vector, n::Integer)~ yields the matrix defined in Eq.(4.3.11) of [fn:2] in the default QPQP basis. Here ~F~ is a linear map from ~Hm~ to ~outModes~.
+
 *** Interferometer
+The function ~interferenceBasedSequence(S::AbstractMatrix; T=I(4))~ yields an array of symplectic matrices consisting of multiple copies of ~S~ interspersed with symplectic matrices that are direct sum of single-mode diagonal blocks. The product of the array is equal to ~T~.
+
+The method ~interferenceBasedSequence(Ss; T=I(4))~ allows replacing single ~S~ with a sequnce of symplectic matrices.
+
+This function has an alias ~infseq~. It implements the main reult in [fn:3].
+
 *** Dilation
+The function ~dilate(S::AbstractMatrix)~ implements Theorem 3.15 in [fn:2]. The input can be an arbitrary real square matrix; and the output is a symplectic matrix.
+
 *** Gaussian channel
+The function ~channel(S::AbstractMatrix, Venv::AbstractMatrix, inModes::Vector, outModes::Vector)~ yields a pair of matrices representing a Gaussian channel transforming quantum states of ~inModes~ to states of ~outModes~.
+
+The symplectic matrix ~S~ represents the unitary Gaussian operation on both the system modes and the environment modes. ~Venv~ represents the covariance matrix of the environment modes.
+
 *** Squeezed vacuum
+The function ~squeezedVacuum(x::Vector)~ generates the covariance matrix ~length(x)~ modes with their Q-quadrature squeezed. For the ith mode, the degree of squeezing is ~x[i]~ dB.
+
 *** Coupled-mode system
 
+
 ** Circuit
+
+* Footnotes
+[fn:3]https://www.nature.com/articles/s41534-022-00581-9 
+
+[fn:2]https://arxiv.org/pdf/2107.01474v1.pdf
+
+[fn:1]https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.120.020502 
