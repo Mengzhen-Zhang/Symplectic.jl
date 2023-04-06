@@ -108,9 +108,24 @@ The symplectic matrix ~S~ represents the unitary Gaussian operation on both the 
 The function ~squeezedVacuum(x::Vector)~ generates the covariance matrix ~length(x)~ modes with their Q-quadrature squeezed. For the ith mode, the degree of squeezing is ~x[i]~ dB.
 
 *** Coupled-mode system
+The code below creates a system of two coupled resonators.
+#+begin_src julia
+  cr = CoupledResonators()
+  cr = addPassive(cr, 1.0, 1, 1)
+  cr = addPassive(cr, 1.0, 2, 2)
+  cr = addPassive(cr, 1.0, 1, 2 )
+  cr = addActive(cr, 1.0, 1, 2 )
+  cr = addGammaIn(cr, 0.1, 1)
+  cr = addGammaIn(cr, 0.01, 2)
+#+end_src
+It first creates a ~CoupledResonators~ struct, then adds $1.0\hat{a}^\dagger \hat{a}$ to the Hamiltonian, then $1.0 \hat{b}^\dagger \hat{b}$, then $1.0(\hat{a}^\dagger \hat{b}^\dagger + h.c.)$, then an intrinsic loss with rate $\gamma_a = 0.1$, and then an intrinsic loss with rate $\gamma_b = 0.01$.
 
+~scatteringMatrix(\omega, cr)~ generates the scattering matrix with probing frequency $\omega$. Its symplectic dilation is created by ~dilatedScatteringMatrix(\omega, cr)~.
+
+Details can be found in Sec. 6 of Appendix A of [fn:2].
 
 ** Circuit
+
 
 * Footnotes
 [fn:3]https://www.nature.com/articles/s41534-022-00581-9 
