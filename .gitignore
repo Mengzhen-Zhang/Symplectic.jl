@@ -26,3 +26,6 @@ Symplectic.docx
 
 #examples
 examples_local/*
+
+#vscode
+.vscode
