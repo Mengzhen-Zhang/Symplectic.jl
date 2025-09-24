@@ -79,14 +79,14 @@ where `M` is a 2n-by-2n **real** matrix and `S` is a 2n-by-2n symplectic matrix;
 $$M = \Omega (S - I)^{-1}(S + I)/2$$
 i.e., the `M` thus obtained should be the same as that in the equation above.
 
-The symplectic cayley transform is implemented as a single-argument funciton `symplecticCayleyTransform` (with alias `cayley`), and its inverse as `inverseSymplecticCayleyTransform` (with alias `invcayley`).
+The symplectic cayley transform is implemented as a single-argument function `symplecticCayleyTransform` (with alias `cayley`), and its inverse as `inverseSymplecticCayleyTransform` (with alias `invcayley`).
 
 
 <a id="org642c433"></a>
 
 ### Pre-Iwasawa factorization
 
-A symplectic matrix $S$ can always be written as the multiplication of three symplectic matrices of specific structures, which is known as the pre-Iwasawa factorization. The factorization can be specificied by the following equation (note that the matrices are represented in the **QQPP** basis) 
+A symplectic matrix $S$ can always be written as the multiplication of three symplectic matrices of specific structures, which is known as the pre-Iwasawa factorization. The factorization can be specified by the following equation (note that the matrices are represented in the **QQPP** basis) 
 ```math
  S = \begin{pmatrix}
     I_n & 0_n \\
@@ -102,7 +102,7 @@ A symplectic matrix $S$ can always be written as the multiplication of three sym
    -Y & X
  \end{pmatrix}.
 ```
-Here, $P$ is an n-by-n symmetric matrix; $L$ is an n-by-n non-singular matrix; $X$ and $Y$ are n-by-n matrices satisfying that $X+iY$ is a unitary matrix, i.e., the right-most of the three matrices on the right-hand-side of the above equation is an orthogonal matrixb. The pre-Iwasawa factorization is unique and well-defined for all symplectic matrices.
+Here, $P$ is an n-by-n symmetric matrix; $L$ is an n-by-n non-singular matrix; $X$ and $Y$ are n-by-n matrices satisfying that $X+iY$ is a unitary matrix, i.e., the right-most of the three matrices on the right-hand-side of the above equation is an orthogonal matrix. The pre-Iwasawa factorization is unique and well-defined for all symplectic matrices.
 
 The pre-Iwasawa factorization is implemented as the function `preIwasawaFactorization` (or `preiwa`), which yields a tuple of three symplectic matrices as are on the right-hand-side of the above equation.
 
@@ -111,9 +111,9 @@ The pre-Iwasawa factorization is implemented as the function `preIwasawaFactoriz
 
 ### Utilities
 
-We provide `hs_norm` to facilliate the calculation of the Hibert-Schmidt norm of a matrix. That is, `hs_norm(M)` yields $\mbox{tr}(M^T*M)$.
+We provide `hs_norm` to facilitate the calculation of the Hilbert-Schmidt norm of a matrix. That is, `hs_norm(M)` yields $\mbox{tr}(M^T*M)$.
 
-To check whether a matrix is symplectic, the user can use the function `nonSymplecticity`. It takes a matrix $S$ as the input and yields the Hilber-Schmidt norm of $S^T \Omega S - \Omega$.
+To check whether a matrix is symplectic, the user can use the function `nonSymplecticity`. It takes a matrix $S$ as the input and yields the Hilbert-Schmidt norm of $S^T \Omega S - \Omega$.
 
 The function `dsum` (or the binary operator `$\oplus$`) is used to produce direct sum of two matrices. It can also take more than two matrices as input: `dsum(A1, A2, ...)`
 
@@ -124,14 +124,14 @@ The binary operator `\otimes` is assigned to `Base.kron` to allow tensor product
 
 ## Physical functions
 
-In physics, symplectic matrices significantly simplifies the analysis of unitary Gaussian processes transforming quadratures operators into their linear combinations. Representations of some commonly used physical componets are provided.
+In physics, symplectic matrices significantly simplifies the analysis of unitary Gaussian processes transforming quadratures operators into their linear combinations. Representations of some commonly used physical components are provided.
 
 
 <a id="orgd37b284"></a>
 
 ### Phase shifting
 
-The 2-by-2 symplectic matrix corresponding to a single-mode phase-shifting operation can be created by the `phaseShifting` with a single real argument. When multiple arguments are given, e.g. ~phaseShifting(x1, x2, x3), it yields the symplectic matrix correpsonding to the simultaneous application of multiple single-mode operations with angles specificed correspondingly by the 
+The 2-by-2 symplectic matrix corresponding to a single-mode phase-shifting operation can be created by the `phaseShifting` with a single real argument. When multiple arguments are given, e.g. ~phaseShifting(x1, x2, x3), it yields the symplectic matrix corresponding to the simultaneous application of multiple single-mode operations with angles specified correspondingly by the 
 arguments.
 
 
@@ -139,7 +139,7 @@ arguments.
 
 ### Beam-splitter
 
-The function `beamSplitter` yields a 4-by-4 symplectic matrix corresponding to a two-mode beam-splitter, with the angle specificed by the input argument.
+The function `beamSplitter` yields a 4-by-4 symplectic matrix corresponding to a two-mode beam-splitter, with the angle specified by the input argument.
 
 The alternative method `beamSplitter(angle, m1, m2, n)` yields a beam-splitter symplectic matrix between mode m1 and m2 in an n-mode system. When n is omitted, the `max(m1, m2)` will be used as the total number of modes in the system.
 
@@ -148,7 +148,7 @@ The alternative method `beamSplitter(angle, m1, m2, n)` yields a beam-splitter s
 
 ### Two-mode squeezing
 
-The symplectic matrix representation of a two-mode squeezing operation can be created by the function `amplifier` with its argument specifing the gain coefficient.
+The symplectic matrix representation of a two-mode squeezing operation can be created by the function `amplifier` with its argument specifying the gain coefficient.
 
 When called with `amplifier(G, m1, m2, n)`, it yields the two-mode squeezing operation between the mode m1 and the mode m2 in a n-mode system. When `n` is omitted, `max(m1, m2)` will be used as the number of modes of the whole system.
 
@@ -157,7 +157,7 @@ When called with `amplifier(G, m1, m2, n)`, it yields the two-mode squeezing ope
 
 ### Circulator
 
-The function `cirulator(perm::Vector)` yields a symplectic matrix of a circulator, i.e., a permutation of modes specified by the vector `perm`. Alternatively, it supports the method `circulator(perm...)`.
+The function `circulator(perm::Vector)` yields a symplectic matrix of a circulator, i.e., a permutation of modes specified by the vector `perm`. Alternatively, it supports the method `circulator(perm...)`.
 
 
 <a id="org8fc5bf1"></a>
@@ -177,9 +177,9 @@ The function `adaptiveMeasurement(F::AbstractMatrix, outModes::Vector, n::Intege
 
 The function `interferenceBasedSequence(S::AbstractMatrix; T=I(4))` yields an array of symplectic matrices consisting of multiple copies of `S` interspersed with symplectic matrices that are direct sum of single-mode diagonal blocks. The product of the array is equal to `T`.
 
-The method `interferenceBasedSequence(Ss; T=I(4))` allows replacing single `S` with a sequnce of symplectic matrices.
+The method `interferenceBasedSequence(Ss; T=I(4))` allows replacing single `S` with a sequence of symplectic matrices.
 
-This function has an alias `infseq`. It implements the main reult in <sup><a id="fnr.3" class="footref" href="#fn.3" role="doc-backlink">3</a></sup>.
+This function has an alias `infseq`. It implements the main result in <sup><a id="fnr.3" class="footref" href="#fn.3" role="doc-backlink">3</a></sup>.
 
 
 <a id="orga17a4ae"></a>
