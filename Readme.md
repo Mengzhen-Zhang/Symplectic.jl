@@ -14,7 +14,7 @@
         2.  [Beam-splitter](#org496897e)
         3.  [Two-mode squeezing](#org401929d)
         4.  [Circulator](#org84d6cb0)
-        5.  [Adpative control](#org8fc5bf1)
+        5.  [Adaptive control](#org8fc5bf1)
         6.  [Interferometer](#orge086a2f)
         7.  [Dilation](#orga17a4ae)
         8.  [Gaussian channel](#orgf05dcf2)
