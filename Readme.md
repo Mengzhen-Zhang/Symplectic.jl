@@ -57,12 +57,13 @@ i.e., a 2n-by-2n block-diagonal matrix with n identical sub-blocks. This matrix 
 ### Basis of the symplectic vector space
 
 With the explicit form of `$\Omega$` as is specified above, the basis of the underlying symplectic vector space is accordingly fixed by default. We refer to this default choice of symplectic basis the **QPQP** basis. However, for certain use cases, it is more convenient to work with an alternative basis, referred to as the **QQPP** basis, in which the symplectic form is of the following form
-$$
-\Omega = \begin{pmatrix}
+```math
+\Omega = \left(\begin{array}{cc}
  0_n & I_n \\
  -I_n & 0_n
-\end{pmatrix}
-$$
+\end{array}\right)
+```
+
 with $0_n$ represents an n-by-n zero matrix and $I_n$ an n-by-n identity matrix. The function `toQQPPBasis` (respectively, `toQPQPBasis`) is provided to convert a matrix represented in the QPQP (respectively, QQPP) basis to the QQPP (respectively, QPQP) basis.
 
 
@@ -78,7 +79,7 @@ where `M` is a 2n-by-2n **real** matrix and `S` is a 2n-by-2n symplectic matrix;
 $$M = \Omega (S - I)^{-1}(S + I)/2$$
 i.e., the `M` thus obtained should be the same as that in the equation above.
 
-The symplectic cayley transform is implemented as a single-argument funciton `symplecticCayleyTransform` (with alias `cayley`), and its inverse as `inverseSymplecticCayleyTransform` (with alias `invcaylay`).
+The symplectic cayley transform is implemented as a single-argument funciton `symplecticCayleyTransform` (with alias `cayley`), and its inverse as `inverseSymplecticCayleyTransform` (with alias `invcayley`).
 
 
 <a id="org642c433"></a>
@@ -86,11 +87,10 @@ The symplectic cayley transform is implemented as a single-argument funciton `sy
 ### Pre-Iwasawa factorization
 
 A symplectic matrix $S$ can always be written as the multiplication of three symplectic matrices of specific structures, which is known as the pre-Iwasawa factorization. The factorization can be specificied by the following equation (note that the matrices are represented in the **QQPP** basis) 
-\\[
+```math
  S = \begin{pmatrix}
-    I<sub>n</sub> & 0<sub>n</sub>   
-    P & I<sub>n</sub>
- \end{pmatrix}
+    I_n & 0_n \\
+    P & I_n \end{pmatrix}
 
 \begin{pmatrix}
    L & 0_n \\
@@ -98,10 +98,10 @@ A symplectic matrix $S$ can always be written as the multiplication of three sym
 \end{pmatrix}
 
  \begin{pmatrix}
-    X & Y   
+    X & Y   \\
    -Y & X
  \end{pmatrix}.
-\\]
+```
 Here, $P$ is an n-by-n symmetric matrix; $L$ is an n-by-n non-singular matrix; $X$ and $Y$ are n-by-n matrices satisfying that $X+iY$ is a unitary matrix, i.e., the right-most of the three matrices on the right-hand-side of the above equation is an orthogonal matrixb. The pre-Iwasawa factorization is unique and well-defined for all symplectic matrices.
 
 The pre-Iwasawa factorization is implemented as the function `preIwasawaFactorization` (or `preiwa`), which yields a tuple of three symplectic matrices as are on the right-hand-side of the above equation.
@@ -157,14 +157,14 @@ When called with `amplifier(G, m1, m2, n)`, it yields the two-mode squeezing ope
 
 ### Circulator
 
-The function `cirulator(perm::Vector)` yields a symplectic matrix of a circulator, i.e., a permutation of modes specified by the vector `perm`. Alternatively, it supports the method `cirulator(perm...)`.
+The function `cirulator(perm::Vector)` yields a symplectic matrix of a circulator, i.e., a permutation of modes specified by the vector `perm`. Alternatively, it supports the method `circulator(perm...)`.
 
 
 <a id="org8fc5bf1"></a>
 
 ### Adpative control
 
-The function `teleport(S::AbstractMatrix, inModes::Vector, outModes::Vector)` implements of the main result in Phys. Rev. Lett. 120, 020502<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>. Here, `S` represents a 2n-by-2n symplectic matrix representing a unitary Gaussian operatio on an n-mode system. `inModes` and `outModes` are vectors of equal sizes representing the input and output modes. Let `ancModes` denote the vector of the modes that are not in `inModes`, and `idlModes` the vector of the modes that are not in `outModes`. Let `Usq` denote `2*ancModes.-1`, and `Hm` denote `2*idlModes.-1`, `In` denote the set of indices either in `2*inModes.-1` or `2*inModes`, and `Out` denote the set of indices either in `2*outModes.-1` or `2*outModes`. This function outputs `S[Out,In]-S[Out,Usq]*(S[Hm,Usq])^(-1)*S[Hm,In]` which is guaranteed to be a symplectic matrix so long as `S[Hm,Usq]` is non-singular.
+The function `teleport(S::AbstractMatrix, inModes::Vector, outModes::Vector)` implements the main result in Phys. Rev. Lett. 120, 020502<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>. Here, `S` represents a 2n-by-2n symplectic matrix representing a unitary Gaussian operation on an n-mode system. `inModes` and `outModes` are vectors of equal sizes representing the input and output modes. Let `ancModes` denote the vector of the modes that are not in `inModes`, and `idlModes` the vector of the modes that are not in `outModes`. Let `Usq` denote `2*ancModes.-1`, and `Hm` denote `2*idlModes.-1`, `In` denote the set of indices either in `2*inModes.-1` or `2*inModes`, and `Out` denote the set of indices either in `2*outModes.-1` or `2*outModes`. This function outputs `S[Out,In]-S[Out,Usq]*(S[Hm,Usq])^(-1)*S[Hm,In]` which is guaranteed to be a symplectic matrix so long as `S[Hm,Usq]` is non-singular.
 
 The function `feedforward(S::AbstractMatrix, inModes::Vector, outModes::Vector)` yields the product `-S[Out,USq]*(S[Hm,Usq])^(-1)` directly.
 
